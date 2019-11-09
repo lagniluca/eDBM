@@ -9,16 +9,16 @@ import wx
 import wx.grid
 
 
-class GridPanel(wx.Panel):
+class eDBMGridPanel(wx.Panel):
     def __init__(self, parent):
-        super(GridPanel, self).__init__(parent)
+        super(eDBMGridPanel, self).__init__(parent, style=wx.BORDER_RAISED)
         self._InitUI()
 
     # Method used for defying the UI of the panel
     def _InitUI(self):
         # Grid component
         self._grid = wx.grid.Grid(self)
-        self._grid.CreateGrid(10, 10)
+        self._grid.CreateGrid(20, 20)
 
         # Example of column header setting
         # self._grid.SetColLablValue(0, "ID")
@@ -34,7 +34,8 @@ class GridPanel(wx.Panel):
         # self._grid.SetCellEditor(1, 1, wx.grid.GridCellNumberEditor(1, 20))
 
         # Placement of the grid component inside the panel
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._grid, wx.ID_ANY, wx.EXPAND)
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        self._sizer.Add(self._grid, wx.ID_ANY, wx.EXPAND)
 
-        self.SetSizer(sizer)
+        self.SetSizer(self._sizer)
+        self._sizer.Fit(self)

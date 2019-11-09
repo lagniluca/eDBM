@@ -8,9 +8,11 @@ Class that contains the code for the main window of the application
 import traceback
 
 import wx
+import wx.aui
 
 from eDBM.src.controller.edbm_db_manager import eDBMDBManager
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
+from eDBM.src.view.pages.edbm_show_articoli_page import eDBMShowArticoliPage
 
 
 class eDBMWindow(wx.Frame):
@@ -18,21 +20,38 @@ class eDBMWindow(wx.Frame):
     def __init__(self, parent):
         super(eDBMWindow, self).__init__(parent, title='eDBM - Produzione')
 
+        self._content_manager = wx.aui.AuiManager(self)
+
+        #Manager del database
+        self._dbm = None
+
         self._InitUI()
 
+    # Method used for instantiating the GUI of the main window
     def _InitUI(self):
-        # Layout of the frame
-        # layout = wx.GridSizer(1, 1, 1, 1)
-        # self.SetSizer(layout)
 
         # login
         self._InitLoginPanel()
 
-        # Setting the topbar menu
-        # self._InitTopMenu()
+        # window settings
         self.SetIcon(wx.Icon('logo.png', wx.BITMAP_TYPE_PNG))
         self.SetSize((700, 500))
         self.Center()
+
+    def _ShowArticoliPage(self):
+        art = eDBMShowArticoliPage(self)
+        info1 = wx.aui.AuiPaneInfo().Center()
+        self._content_manager.AddPane(art, info1)
+        self._content_manager.Update()
+
+    def _InitToolBar(self):
+        self._toolbar = self.CreateToolBar(style=wx.TB_BOTTOM)
+
+        #disconnessione
+        self._disconnettiTool = self._toolbar.AddTool(wx.ID_ANY, 'Disconnetti', wx.Bitmap('disconnetti.png'))
+        self._sottoscorteTool = self._toolbar.AddTool(wx.ID_ANY, 'Sottoscorte', wx.Bitmap('warning.png'))
+
+        self._toolbar.Realize()
 
     # Method used for displaying the connection panel
     def _InitLoginPanel(self):
@@ -95,16 +114,16 @@ class eDBMWindow(wx.Frame):
 
         self._menubar.Append(self._articoliMenu, '&Articoli')
 
-        # Menu ricette
-        self._ricetteMenu = wx.Menu()
+        # Menu materie prime
+        self._mpMenu = wx.Menu()
 
-        self._aggiungiRicettaItem = self._ricetteMenu.Append(wx.ID_ANY, 'Aggiungi ricetta')
-        self._ricetteMenu.AppendSeparator()
-        self._modificaRicettaItem = self._ricetteMenu.Append(wx.ID_ANY, 'Modifica ricetta')
-        self._ricetteMenu.AppendSeparator()
-        self._visualizzaRicettaItem = self._ricetteMenu.Append(wx.ID_ANY, 'Visualizza ricette')
+        self._aggiungiMPItem = self._mpMenu.Append(wx.ID_ANY, 'Aggiungi materia prima')
+        self._mpMenu.AppendSeparator()
+        self._modificaMPItem = self._mpMenu.Append(wx.ID_ANY, 'Modifica materia prima')
+        self._mpMenu.AppendSeparator()
+        self._visualizzaMPItem = self._mpMenu.Append(wx.ID_ANY, 'Visualizza materie prime')
 
-        self._menubar.Append(self._ricetteMenu, '&Ricette')
+        self._menubar.Append(self._mpMenu, '&Materie prime')
 
         # Menu produzione
         self._produzioneMenu = wx.Menu()
@@ -120,16 +139,18 @@ class eDBMWindow(wx.Frame):
         user = None  # self._userLoginText.GetValue()
         pwd = None  # self._pwdLoginText.GetValue()
         dbl = self._dblLoginPicker.GetPath()
-        dbm = eDBMDBManager(user, pwd, dbl)
+        self._dbm = eDBMDBManager(user, pwd, dbl)
 
         try:
-            connesso = dbm.connettiDB()
+            connesso = self._dbm.connettiDB()
 
             if connesso:
                 md = eDBMMessageDialog('Connessione database produzione', 'Connessione stabilita', False)
                 md.start()
                 self._loginPanel.Hide()
                 self._InitTopMenu()
+                self._InitToolBar()
+                self._ShowArticoliPage()
             else:
                 md = eDBMMessageDialog('Connessione database produzione', 'Connessione NON stabilita', True)
                 md.start()
@@ -138,3 +159,6 @@ class eDBMWindow(wx.Frame):
             track = traceback.format_exc()
             md = eDBMMessageDialog('Connessione database produzione - NON STABILITA - Eccezione lanciata', track, True)
             md.start()
+
+
+
