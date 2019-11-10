@@ -5,144 +5,298 @@ from eDBM.src.model.exceptions.edbm_exception import eDBMException
 class eDBMMateriaPrima:
 
     def __init__(self):
-        self._id = None
+        self._id = ''
         self._id_settato = False
-        self._codice = None
+        self._codice = ""
         self._codice_settato = False
-        self._descrizione = None
+        self._descrizione = ""
         self._descrizione_settato = False
-        self._lotto = None
+        self._lotto = ""
         self._lotto_settato = False
-        self._registrazione = None
+        self._registrazione = ""
         self._registrazione_settato = False
-        self._tipo = None
+        self._tipo = -1
         self._tipo_settato = False
-        self._data = None
+        self._data = ""
         self._data_settato = False
-        self._ora = None
+        self._ora = ""
         self._ora_settato = False
-        self._ddt = None
+        self._ddt = ""
         self._ddt_settato = False
-        self._data_ddt = None
+        self._data_ddt = ""
         self._data_ddt_settato = False
 
     def setID(self, id):
-        if self._id is None :
+        if self.validaID(id):
             self._id = id
-            self._id_settato = True
+
+    def validaID(self, id):
+        if id is None:
+            return False
+
+        if not isinstance(id, int):
+            return False
+
+        if id < 0 :
+            return False
+
+        return True
+
+    def confrontaID(self, id):
+        uguali = False
+        if self.validaID(id) :
+            if self._id == id:
+                uguali = True
+
+        return uguali
 
     def setCodice(self, codice):
-        if self._codice is None:
-            print("11b ")
-            if isinstance(codice, str) is True:
-                if not codice :
-                    raise eDBMException("codice inserito nullo")
-                else:
-                    self._codice = codice
-                    self._codice_settato = True
-            else:
-                raise eDBMException("codice inserito non è di tipo testo")
+        if self.validaCodice(codice):
+            self._codice = codice
         else:
-            raise eDBMException("codice già inserito")
+            raise eDBMException("codice inserito non valido")
+
+    def validaCodice(self, codice):
+        if codice is None:
+            return False
+
+        if not isinstance(codice, str):
+            return False
+
+        if not codice:
+            return False
+
+        return True
+
+    def confrontaCodice(self, codice):
+        uguali = False
+        if self.validaCodice(codice):
+            if self._codice is not None :
+                if self._codice == codice :
+                    uguali = True
+
+        return uguali
 
     def setDescrizione(self, descrizione):
-        if self._descrizione is None:
-            if isinstance(descrizione, str):
-                if not descrizione :
-                    pass
-                else:
-                    self._descrizione = descrizione
-                    self._descrizione_settato = True
-            else:
-                raise eDBMException("la descrizione inserita non è di tipo testo")
+        if self.validaDescrizione(descrizione):
+            self._descrizione = descrizione
+        else:
+            raise eDBMException("descrizione non valida")
+
+    def validaDescrizione(self, descrizione):
+        if descrizione is None:
+            return False
+
+        if not isinstance(descrizione, str):
+            return False
+
+        return True
+
+    def confrontaDescrizione(self, descrizione):
+        uguali = False
+        if self.validaDescrizione(descrizione):
+            if self._descrizione == descrizione:
+                uguali = True
 
     def setLotto(self, lotto):
-        if self._lotto is None:
-            if isinstance(lotto, str):
-                if not lotto:
-                    raise eDBMException("lotto inserito nullo")
-                else:
-                    self._lotto = lotto
-                    self._lotto_settato = True
-            else:
-                raise eDBMException("lotto inserito non è di tipo testo")
+        if self.validaLotto(lotto):
+           self._lotto = lotto
         else:
-            raise eDBMException("lotto già inserito")
+            raise eDBMException("lotto non valido")
+
+    def validaLotto(self, lotto):
+        if lotto is None:
+            return False
+
+        if not isinstance(lotto, str):
+            return False
+
+        if not lotto :
+            return False
+
+        return True
+
+    def confrontaLotto(self, lotto):
+        uguali = False
+        if self.validaLotto(lotto):
+            if self._lotto == lotto:
+                uguali = True
+
+        return uguali
 
     def setRegistrazione(self, registrazione):
-        if self._registrazione is None:
-            if isinstance(registrazione, str):
-                if not registrazione:
-                    raise eDBMException("registrazione inserita nulla")
-                else:
-                    self._registrazione = registrazione
-                    self._registrazione_settato = True
-            else:
-                raise eDBMException("registrazione inserito non è di tipo testo")
+        if self.validaRegistrazione(registrazione):
+            self._registrazione = registrazione
         else:
-            raise eDBMException("registrazione già inserito")
+            raise eDBMException("registrazione non valida")
+
+    def validaRegistrazione(self, registrazione):
+        if registrazione is None :
+            return False
+
+        if not isinstance(registrazione, str):
+            return False
+
+        if not registrazione :
+            return False
+
+        return True
+
+    def confrontaRegistrazione(self, registrazione):
+        uguali = False
+
+        if self.validaRegistrazione(registrazione):
+            if self._registrazione == registrazione:
+                uguali = True
 
     def setTipo(self, tipo):
-        if self._tipo is None:
-            if isinstance(tipo, int):
-                self._tipo = tipo
-                self._tipo_settato = True
-            else:
-                raise eDBMException("tipo inserito non è di tipo intero")
+        if self.validaTipo(tipo):
+            self._tipo = tipo
         else:
-            raise eDBMException("tipo già inserito")
+            raise eDBMException("tipo non valido")
+
+    def validaTipo(self, tipo):
+        if tipo is None:
+            return False
+
+        if not isinstance(tipo, int):
+            return False
+
+        if tipo < 0 :
+            return False
+
+        return True
+
+    def confrontaTipo(self, tipo):
+        uguali = False
+
+        if self.validaTipo(tipo):
+            if self._tipo == tipo :
+                uguali = True
+
+        return uguali
 
     def setData(self, data):
-        if self._data is None:
-            if isinstance(data, str):
-                if not data:
-                    raise eDBMException("data inserita nulla")
-                else:
-                    self._data = data
-                    self._data_settato = True
-            else:
-                raise eDBMException("la data inserita non è di tipo testo")
+        if self.validaData(data):
+            self._data = data
         else:
-            raise eDBMException("data già inserita")
+            raise eDBMException("data non valida")
+
+    def validaData(self, data):
+        if data is None :
+            return False
+
+        if not isinstance(data, str):
+            return False
+
+        if not data:
+            return False
+
+        return True
+
+    def confrontaData(self, data):
+        uguali = False
+
+        if self.validaData(data):
+            if self._data == data:
+                uguali = True
+
+        return uguali
 
     def setOra(self, ora):
-        if self._ora is None:
-            if isinstance(ora, str):
-                if not ora :
-                    raise eDBMException("ora inserita nulla")
-                else:
-                    self._ora = ora
-                    self._ora_settato = True
-            else:
-                raise eDBMException("l' ora inserita non è di tipo testo")
+        if self.validaOra(ora):
+            self._ora = ora
         else:
-            raise eDBMException("ora già inserita")
+            raise eDBMException("ora non valida")
+
+    def validaOra(self, ora):
+        if ora is None :
+            return False
+
+        if not isinstance(ora, str):
+            return False
+
+        if not ora :
+            return False
+
+        return True
+
+    def confrontaOra(self, ora):
+        uguali = False
+
+        if self.validaOra(ora):
+            if self._ora == ora:
+                uguali = True
+
+        return uguali
 
     def setDDT(self, ddt):
-        if self._ddt is None:
-            if isinstance(ddt, str):
-                if not ddt:
-                    pass
-                else:
-                    self._ddt = ddt
-                    self._ddt_settato = True
-            else:
-                raise eDBMException("ddt inserito non è di tipo testo")
+        if self.validaDDT(ddt):
+            self._ddt = ddt
         else:
-            raise eDBMException("ddt già inserita")
+            raise eDBMException("ddt non valido")
+
+    def validaDDT(self, ddt):
+        if ddt is None:
+            return False
+
+        if not isinstance(ddt, str):
+            return False
+
+        return True
+
+    def confrontaDDT(self, ddt):
+        uguali = False
+
+        if self.validaDDT(ddt):
+            if self._ddt == ddt:
+                uguali = True
+
+        return uguali
+
 
     def setDataDDT(self, data_ddt):
-        if self._data_ddt is None and data_ddt is not None:
-            if isinstance(data_ddt, str):
-                if not data_ddt :
-                    raise eDBMException("data ddt inserita nulla")
-                else:
-                    self._data_ddt = data_ddt
-                    self._data_ddt_settato = True
-            else:
-                raise eDBMException("data DDT inserita non è di tipo testo")
+        if self.validaDataDDT(data_ddt):
+            self._data_ddt = data_ddt
         else:
-            raise eDBMException("data DDT già inserita")
+            raise eDBMException("data DDT non valida")
+
+    def validaDataDDT(self, dataDDT):
+        if dataDDT is None :
+            return False
+
+        if not isinstance(dataDDT, str):
+            return False
+
+        if not dataDDT :
+            return False
+
+        return True
+
+    def confrontaDataDDT(self, dataDDT):
+        uguali = False
+
+        if self.validaDataDDT(dataDDT):
+            if self._data_ddt == dataDDT:
+                uguali = True
+
+        return uguali
+
+    def equals(self, altra_mp):
+        uguali = True
+
+        uguali = uguali and self.confrontaID(altra_mp.getID())
+        uguali = uguali and self.confrontaCodice(altra_mp.getCodice())
+        uguali = uguali and self.confrontaDescrizione(altra_mp.getDescrizione())
+        uguali = uguali and self.confrontaLotto(altra_mp.getLotto())
+        uguali = uguali and self.confrontaRegistrazione(altra_mp.getID())
+        uguali = uguali and self.confrontaTipo(altra_mp.getTipo())
+        uguali = uguali and self.confrontaData(altra_mp.getData())
+        uguali = uguali and self.confrontaOra(altra_mp.getOra())
+        uguali = uguali and self.confrontaDDT(altra_mp.getDDT())
+        uguali = uguali and self.confrontaDataDDT(altra_mp.getDataDDT())
+
+        return uguali
 
     def getID(self):
         return self._id
@@ -175,69 +329,83 @@ class eDBMMateriaPrima:
         return self._data_ddt
 
     def valida(self):
-        valido = False
 
-        if not self._codice_settato:
-            raise eDBMException("codice non settato")
+        if not self.validaID(self._id):
+            pass
 
-        if not self._lotto_settato :
-            raise eDBMException("lotto non settato")
+        if not self.validaCodice(self._codice) :
+            raise eDBMException("codice non valido")
 
-        if not self._registrazione_settato :
-            raise eDBMException("registrazione non settato")
+        if not self.validaDescrizione(self._descrizione) :
+            raise eDBMException("descrizione non valida")
 
-        if not self._tipo_settato:
-            raise eDBMException("tipo non settato")
+        if not self.validaLotto(self._lotto):
+            raise eDBMException("lotto non valido")
 
-        if not self._data_settato:
-            raise eDBMException("data non settato")
+        if not self.validaRegistrazione(self._registrazione):
+            raise eDBMException("registrazione non valida")
 
-        if not self._ora_settato:
-            raise eDBMException("ora non settato")
+        if not self.validaTipo(self._tipo):
+            raise eDBMException("tipo non valido")
 
-        if not self._data_ddt_settato:
-            raise eDBMException("data ddt non settato")
+        if not self.validaData(self._data):
+            raise eDBMException("data non valida")
 
-        valido = True
+        if not self.validaOra(self._ora):
+            raise eDBMException("ora non valida")
 
-        return valido
+        if not self.validaDDT(self._ddt):
+            raise eDBMException("DDT non valido")
+
+        if not self.validaDataDDT(self._data_ddt):
+            raise eDBMException("data DDT non valida")
+
+        return True
 
     def generaAggiungiMateriaPrimaQuery(self):
         self.valida()
 
-        query = "INSERT INTO materie_prime (Codice,"
-
-        if self._descrizione_settato :
-            query += "Descrizione,"
-
-        query += "Lotto, Registrazione, Tipo, Data, Ora, "
-
-        if self._ddt_settato :
-            query += "DDT, "
-
-        query += "DataDdt) "
+        query = "INSERT INTO materie_prime (Codice, Descrizione, Lotto, Registrazione, Tipo, Data, Ora, DDT, DataDDT) "
         query += "VALUES ('" + self._codice +"', "
-
-        if self._descrizione_settato:
-            query += "'" + self._descrizione + "',"
-
+        query += "'" + self._descrizione + "',"
         query += "'" + self._lotto + "', "
         query += "'" + self._registrazione + "', "
         query += "'" + str(self._tipo) + "', "
         query += "'" + self._data + "', "
         query += "'" + self._ora + "', "
-
-        if self._ddt_settato :
-            query += "'" + self._ddt +"', "
-
+        query += "'" + self._ddt +"', "
         query += "'" + self._data_ddt + "') "
 
         print(query)
 
         return query
 
-    def __str__(self):
-        s = "ID : " + str(self._id)
+    def generaRimuoviMateriaPrimaQuery(self):
+        self.valida()
 
-        return s
+        query = "DELETE FROM materie_prime WHERE "
+        query += "ID=" + str(self.getID()) +""
+
+        print(query)
+
+        return query
+
+    def generaModificaMateriaPrimaQuery(self):
+        self.valida()
+
+        query = "UPDATE materie_prime SET "
+        query += "Codice='" + str(self.getCodice()) + "',"
+        query += "Descrizione='" + str(self.getDescrizione()) + "',"
+        query += "Lotto='" + str(self.getLotto()) + "',"
+        query += "Registrazione='" + str(self.getRegistrazione()) + "',"
+        query += "Tipo=" + str(self.getTipo()) + ","
+        query += "Data='" + str(self.getData()) + "',"
+        query += "Ora='" + str(self.getOra()) + "',"
+        query += "DDT='" + str(self.getDDT()) + "',"
+        query += "DataDdt='" + str(self.getDataDDT()) + "' "
+        query += "WHERE ID=" + str(self.getID()) + ""
+
+        print(query)
+
+        return query
 

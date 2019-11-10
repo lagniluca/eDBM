@@ -26,7 +26,7 @@ class eDBMShowMateriePrimePage(wx.Panel):
         self._visualizzaMateriePrimeTab = wx.SplitterWindow(self._notebook, style=wx.SP_3DSASH)
         box = wx.BoxSizer(wx.VERTICAL)
 
-        self._pan2 = eDBMMateriePrimeGridPanel(self._visualizzaMateriePrimeTab, parent, dbconn, False)
+        self._pan2 = eDBMMateriePrimeGridPanel(self._visualizzaMateriePrimeTab, parent, dbconn, True)
         self._pan1 = eDBMShowMateriePrimeDash(self._visualizzaMateriePrimeTab, self._dbconn, self._pan2)
 
         box.Add(self._pan1, wx.ID_ANY, wx.EXPAND | wx.ALL)
