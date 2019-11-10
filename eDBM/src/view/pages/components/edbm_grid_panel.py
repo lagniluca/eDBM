@@ -8,6 +8,8 @@ Class used for creating a grid component
 import wx
 import wx.grid
 
+#Access libraries
+import pyodbc
 
 class eDBMGridPanel(wx.Panel):
     def __init__(self, parent):
@@ -39,3 +41,4 @@ class eDBMGridPanel(wx.Panel):
 
         self.SetSizer(self._sizer)
         self._sizer.Fit(self)
+

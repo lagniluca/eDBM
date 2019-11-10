@@ -12,6 +12,8 @@ import wx.aui
 
 from eDBM.src.controller.edbm_db_manager import eDBMDBManager
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
+from eDBM.src.view.pages.components.edbm_sottoscorte_dialog import eDBMSottoscorteDialog
+from eDBM.src.view.pages.edbm_add_articolo_page import eDBMAddArticoloPage
 from eDBM.src.view.pages.edbm_show_articoli_page import eDBMShowArticoliPage
 
 
@@ -21,6 +23,8 @@ class eDBMWindow(wx.Frame):
         super(eDBMWindow, self).__init__(parent, title='eDBM - Produzione')
 
         self._content_manager = wx.aui.AuiManager(self)
+        self._current_central_panel = None # reference al pannello centrale corrente
+
 
         #Manager del database
         self._dbm = None
@@ -31,6 +35,7 @@ class eDBMWindow(wx.Frame):
     def _InitUI(self):
 
         # login
+        self._InitToolBar()
         self._InitLoginPanel()
 
         # window settings
@@ -38,20 +43,42 @@ class eDBMWindow(wx.Frame):
         self.SetSize((700, 500))
         self.Center()
 
-    def _ShowArticoliPage(self):
-        art = eDBMShowArticoliPage(self)
-        info1 = wx.aui.AuiPaneInfo().Center()
-        self._content_manager.AddPane(art, info1)
+    def _ShowHomePage(self):
+        self._loginPanel.Show(False)
         self._content_manager.Update()
+
+    def _ShowArticoliPage(self):
+        pan = eDBMShowArticoliPage(self, self._dbm)
+        info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
+        self._content_manager.AddPane(pan, info1)
+        self._content_manager.Update()
+        self._current_central_panel = pan
+
+    def _AddArticoloPage(self):
+        pan = eDBMAddArticoloPage(self)
+        info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
+        self._content_manager.AddPane(pan, info1)
+        self._content_manager.Update()
+        self._current_central_panel = pan
 
     def _InitToolBar(self):
         self._toolbar = self.CreateToolBar(style=wx.TB_BOTTOM)
-
-        #disconnessione
-        self._disconnettiTool = self._toolbar.AddTool(wx.ID_ANY, 'Disconnetti', wx.Bitmap('disconnetti.png'))
-        self._sottoscorteTool = self._toolbar.AddTool(wx.ID_ANY, 'Sottoscorte', wx.Bitmap('warning.png'))
+        self._disconnettiTool = self._toolbar.AddTool(100, "Disconnetti", wx.Bitmap('logout.png'))
+        self._toolbar.AddSeparator()
+        self._infoTool = self._toolbar.AddTool(200, 'Info', wx.Bitmap('info.png'))
+        self._toolbar.AddSeparator()
+        self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
+        self._toolbar.AddSeparator()
+        self._sottoscorteTool = self._toolbar.AddTool(400, 'Sottoscorte', wx.Bitmap('sottoscorte.png'))
 
         self._toolbar.Realize()
+
+        self.Bind(wx.EVT_TOOL, self._OnSottoscorteClicked, self._sottoscorteTool)
+
+        self._toolbar.EnableTool(100, False)
+        self._toolbar.EnableTool(200, True)
+        self._toolbar.EnableTool(300, False)
+        self._toolbar.EnableTool(400, False)
 
     # Method used for displaying the connection panel
     def _InitLoginPanel(self):
@@ -88,7 +115,7 @@ class eDBMWindow(wx.Frame):
         fgs.AddMany([(user), (self._userLoginText, 1, wx.EXPAND),  # (pad1),
                      (pwd), (self._pwdLoginText, 1, wx.EXPAND),  # (pad2),
                      (dbl), (self._dblLoginPicker, 1, wx.EXPAND),  # (pad3),
-                     (pad4), (self._connettiDBLoginBtn, 1, wx.EXPAND),  # (pad5)
+                     (pad4), (self._connettiDBLoginBtn, 1, wx.ALIGN_RIGHT),  # (pad5)
                      ])
 
         """
@@ -110,7 +137,10 @@ class eDBMWindow(wx.Frame):
         self._articoliMenu.AppendSeparator()
         self._modificaArticoloItem = self._articoliMenu.Append(wx.ID_ANY, 'Modifica articolo')
         self._articoliMenu.AppendSeparator()
-        self._visualizzaArticoloItem = self._articoliMenu.Append(wx.ID_ANY, 'Visualizza articoli')
+        self._visualizzaArticoloItem = self._articoliMenu.Append(wx.ID_ANY, 'Visualizza articolo')
+
+        self.Bind(wx.EVT_MENU, self._AggiungiArticoloDBPageLoader, self._aggiungiArticoloItem)
+        self.Bind(wx.EVT_MENU, self._VisualizzaArticoliDBPageLoader, self._visualizzaArticoloItem)
 
         self._menubar.Append(self._articoliMenu, '&Articoli')
 
@@ -134,6 +164,13 @@ class eDBMWindow(wx.Frame):
 
         self.SetMenuBar(self._menubar)
 
+    # metodo usato per rimuovere il pannello centrale dalla finestra
+    def _CleanWindowsCentralPanel(self):
+        if self._current_central_panel is not None:
+            self._content_manager.DetachPane(self._current_central_panel)
+            self._current_central_panel.Destroy()
+        self._content_manager.Update()
+
     # Metodo richiamato dal button per stabilire la connessione al database
     def _connettiDB(self, evt):
         user = None  # self._userLoginText.GetValue()
@@ -149,8 +186,7 @@ class eDBMWindow(wx.Frame):
                 md.start()
                 self._loginPanel.Hide()
                 self._InitTopMenu()
-                self._InitToolBar()
-                self._ShowArticoliPage()
+                self._ShowHomePage()
             else:
                 md = eDBMMessageDialog('Connessione database produzione', 'Connessione NON stabilita', True)
                 md.start()
@@ -159,6 +195,21 @@ class eDBMWindow(wx.Frame):
             track = traceback.format_exc()
             md = eDBMMessageDialog('Connessione database produzione - NON STABILITA - Eccezione lanciata', track, True)
             md.start()
+
+    # sezione riguardante i metodi richiamati da articoli
+    def _VisualizzaArticoliDBPageLoader(self, evt):
+        self._CleanWindowsCentralPanel()
+        self._loginPanel.Hide()
+        self._ShowArticoliPage()
+
+    def _AggiungiArticoloDBPageLoader(self, evt):
+        self._CleanWindowsCentralPanel()
+        self._loginPanel.Hide()
+        self._AddArticoloPage()
+
+    def _OnSottoscorteClicked(self, evt):
+        dia = eDBMSottoscorteDialog(None)
+        dia.Show(True)
 
 
 

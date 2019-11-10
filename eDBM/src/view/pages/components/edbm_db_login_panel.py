@@ -41,13 +41,13 @@ class eDBMDBLoginPanel(wx.Panel):
         # connection button
         pad4 = wx.StaticText(self, label='')  # padding element
         #pad5 = wx.StaticText(self, label='')  # padding element
-        self._connettiDBLoginBtn = wx.Button(self, wx.ID_ANY, u"connetti", wx.DefaultPosition, wx.DefaultSize, 0)
+        self._connettiDBLoginBtn = wx.Button(self, wx.ID_ANY, u"connetti")
         self._connettiDBLoginBtn.Bind(wx.EVT_BUTTON, self._connettiDB)
 
         fgs.AddMany([(user), (self._userLoginText, 1, wx.EXPAND), #(pad1),
                      (pwd), (self._pwdLoginText, 1, wx.EXPAND), #(pad2),
                      (dbl), (self._dblLoginPicker, 1, wx.EXPAND), #(pad3),
-                     (pad4), (self._connettiDBLoginBtn, 1, wx.EXPAND), #(pad5)
+                     (pad4), (self._connettiDBLoginBtn, wx.ID_ANY, wx.ALIGN_RIGHT), #(pad5)
                      ])
 
         """
