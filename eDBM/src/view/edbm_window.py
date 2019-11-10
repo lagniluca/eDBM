@@ -16,6 +16,7 @@ from eDBM.src.view.pages.components.edbm_sottoscorte_dialog import eDBMSottoscor
 from eDBM.src.view.pages.edbm_add_articolo_page import eDBMAddArticoloPage
 from eDBM.src.view.pages.edbm_add_materia_prima_page import eDBMAddMateriaPrimaPage
 from eDBM.src.view.pages.edbm_show_articoli_page import eDBMShowArticoliPage
+from eDBM.src.view.pages.edbm_show_materie_prime_page import eDBMShowMateriePrimePage
 
 
 class eDBMWindow(wx.Frame):
@@ -66,6 +67,13 @@ class eDBMWindow(wx.Frame):
     # Materie prime
     def _AddMateriaPrimaPage(self):
         pan = eDBMAddMateriaPrimaPage(self, self._dbm)
+        info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
+        self._content_manager.AddPane(pan, info1)
+        self._content_manager.Update()
+        self._current_central_panel = pan
+
+    def _ShowMateriePrimePage(self):
+        pan = eDBMShowMateriePrimePage(self, self._dbm)
         info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
         self._content_manager.AddPane(pan, info1)
         self._content_manager.Update()
@@ -164,6 +172,7 @@ class eDBMWindow(wx.Frame):
         self._visualizzaMPItem = self._mpMenu.Append(wx.ID_ANY, 'Visualizza materie prime')
 
         self.Bind(wx.EVT_MENU, self._AggiungiMateriaPrimaDBPageLoader, self._aggiungiMPItem)
+        self.Bind(wx.EVT_MENU, self._VisualizzaMateriePrimeDBPageLoader, self._visualizzaMPItem)
 
         self._menubar.Append(self._mpMenu, '&Materie prime')
 
@@ -224,9 +233,17 @@ class eDBMWindow(wx.Frame):
         self._CleanWindowsCentralPanel()
         self._AddMateriaPrimaPage()
 
+    def _VisualizzaMateriePrimeDBPageLoader(self, evt):
+        self._CleanWindowsCentralPanel()
+        self._ShowMateriePrimePage()
+
     def _OnSottoscorteClicked(self, evt):
         dia = eDBMSottoscorteDialog(None)
         dia.Show(True)
+
+    def aggiornaVisualizzaMateriePrime(self):
+        self._CleanWindowsCentralPanel()
+        self._ShowMateriePrimePage()
 
 
 
