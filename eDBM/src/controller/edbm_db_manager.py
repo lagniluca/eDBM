@@ -53,6 +53,9 @@ class eDBMDBManager:
 
         return self._connesso
 
+    def connessione(self):
+        return self._conn
+
     # Metodo usato per chiudere una connessione con il database
     def disconnettiDB(self):
         if self._connesso :

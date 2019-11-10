@@ -27,7 +27,7 @@ class eDBMSottoscorteDialog(wx.Frame):
         vbox = wx.BoxSizer(wx.VERTICAL)
         clrBtn = wx.Button(btnPanel, wx.ID_ANY, 'Azzera', size=(90, 30))
 
-        #self.Bind(wx.EVT_BUTTON, self.OnClear, id=clrBtn.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnClear, id=clrBtn.GetId())
         #self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnRename)
 
         vbox.Add((-1, 20))
@@ -36,3 +36,6 @@ class eDBMSottoscorteDialog(wx.Frame):
         btnPanel.SetSizer(vbox)
         hbox.Add(btnPanel, 0.6, wx.EXPAND | wx.RIGHT, 20)
         panel.SetSizer(hbox)
+
+    def OnClear(self, evt):
+        pass

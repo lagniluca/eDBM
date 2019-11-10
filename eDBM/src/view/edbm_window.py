@@ -14,6 +14,7 @@ from eDBM.src.controller.edbm_db_manager import eDBMDBManager
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
 from eDBM.src.view.pages.components.edbm_sottoscorte_dialog import eDBMSottoscorteDialog
 from eDBM.src.view.pages.edbm_add_articolo_page import eDBMAddArticoloPage
+from eDBM.src.view.pages.edbm_add_materia_prima_page import eDBMAddMateriaPrimaPage
 from eDBM.src.view.pages.edbm_show_articoli_page import eDBMShowArticoliPage
 
 
@@ -47,6 +48,7 @@ class eDBMWindow(wx.Frame):
         self._loginPanel.Show(False)
         self._content_manager.Update()
 
+    # Articoli
     def _ShowArticoliPage(self):
         pan = eDBMShowArticoliPage(self, self._dbm)
         info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
@@ -61,14 +63,22 @@ class eDBMWindow(wx.Frame):
         self._content_manager.Update()
         self._current_central_panel = pan
 
+    # Materie prime
+    def _AddMateriaPrimaPage(self):
+        pan = eDBMAddMateriaPrimaPage(self, self._dbm)
+        info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
+        self._content_manager.AddPane(pan, info1)
+        self._content_manager.Update()
+        self._current_central_panel = pan
+
     def _InitToolBar(self):
         self._toolbar = self.CreateToolBar(style=wx.TB_BOTTOM)
         self._disconnettiTool = self._toolbar.AddTool(100, "Disconnetti", wx.Bitmap('logout.png'))
         self._toolbar.AddSeparator()
         self._infoTool = self._toolbar.AddTool(200, 'Info', wx.Bitmap('info.png'))
         self._toolbar.AddSeparator()
-        self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
-        self._toolbar.AddSeparator()
+        #self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
+        #self._toolbar.AddSeparator()
         self._sottoscorteTool = self._toolbar.AddTool(400, 'Sottoscorte', wx.Bitmap('sottoscorte.png'))
 
         self._toolbar.Realize()
@@ -77,8 +87,8 @@ class eDBMWindow(wx.Frame):
 
         self._toolbar.EnableTool(100, False)
         self._toolbar.EnableTool(200, True)
-        self._toolbar.EnableTool(300, False)
-        self._toolbar.EnableTool(400, False)
+        #self._toolbar.EnableTool(300, False)
+        self._toolbar.EnableTool(400, True)
 
     # Method used for displaying the connection panel
     def _InitLoginPanel(self):
@@ -153,6 +163,8 @@ class eDBMWindow(wx.Frame):
         self._mpMenu.AppendSeparator()
         self._visualizzaMPItem = self._mpMenu.Append(wx.ID_ANY, 'Visualizza materie prime')
 
+        self.Bind(wx.EVT_MENU, self._AggiungiMateriaPrimaDBPageLoader, self._aggiungiMPItem)
+
         self._menubar.Append(self._mpMenu, '&Materie prime')
 
         # Menu produzione
@@ -196,7 +208,7 @@ class eDBMWindow(wx.Frame):
             md = eDBMMessageDialog('Connessione database produzione - NON STABILITA - Eccezione lanciata', track, True)
             md.start()
 
-    # sezione riguardante i metodi richiamati da articoli
+    # Articoli
     def _VisualizzaArticoliDBPageLoader(self, evt):
         self._CleanWindowsCentralPanel()
         self._loginPanel.Hide()
@@ -206,6 +218,11 @@ class eDBMWindow(wx.Frame):
         self._CleanWindowsCentralPanel()
         self._loginPanel.Hide()
         self._AddArticoloPage()
+
+    # Materie prime
+    def _AggiungiMateriaPrimaDBPageLoader(self, evt):
+        self._CleanWindowsCentralPanel()
+        self._AddMateriaPrimaPage()
 
     def _OnSottoscorteClicked(self, evt):
         dia = eDBMSottoscorteDialog(None)

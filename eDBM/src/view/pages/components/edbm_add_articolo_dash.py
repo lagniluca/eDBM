@@ -5,9 +5,16 @@ Classe che contiene il codice per la pagine riguardante l'aggiunta di un articol
 """
 
 # Librerie wx
+import traceback
+
 import wx
 import wx.adv
 import wx.lib.scrolledpanel
+
+from eDBM.src.model.edbm_articolo import eDBMArticolo
+from eDBM.src.model.exceptions.edbm_exception import eDBMException
+from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
+
 
 class eDBMAddArticoloDash(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent):
@@ -19,7 +26,7 @@ class eDBMAddArticoloDash(wx.lib.scrolledpanel.ScrolledPanel):
     def _InitUI(self):
         # Layouts
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        fgs = wx.FlexGridSizer(13, 2, 9, 25)
+        fgs = wx.FlexGridSizer(15, 2, 9, 25)
 
         # codice
         codice = wx.StaticText(self, label='codice:')
@@ -49,6 +56,10 @@ class eDBMAddArticoloDash(wx.lib.scrolledpanel.ScrolledPanel):
         colore = wx.StaticText(self, label='colore:')
         self._aggiungiColoreArticoloText = wx.TextCtrl(self)
 
+        # colore
+        percentuale = wx.StaticText(self, label='percentuale colore:')
+        self._aggiungiPercentualeColoreArticoloText = wx.TextCtrl(self)
+
         # anticipo colore
         anticipo = wx.StaticText(self, label="anticipo colore:'")
         self._aggiungiAnticipoColoreArticoloText = wx.SpinCtrl(self)
@@ -60,6 +71,10 @@ class eDBMAddArticoloDash(wx.lib.scrolledpanel.ScrolledPanel):
         # programma C25
         programma_c25 = wx.StaticText(self, label='programma C25:')
         self._aggiungiProgrammaC25ArticoloText = wx.TextCtrl(self)
+
+        # programma HP12
+        programma_hp12 = wx.StaticText(self, label='programma HP12:')
+        self._aggiungiProgrammaHP12ArticoloText = wx.TextCtrl(self)
 
         # data
         data = wx.StaticText(self, label='data:')
@@ -83,9 +98,11 @@ class eDBMAddArticoloDash(wx.lib.scrolledpanel.ScrolledPanel):
             (inserto), (self._aggiungiInsertoArticoloText, wx.ID_ANY, wx.EXPAND),
             (quantita), (self._aggiungiQuantitaArticoloText, wx.ID_ANY, wx.EXPAND),
             (colore), (self._aggiungiColoreArticoloText, wx.ID_ANY, wx.EXPAND),
+            (percentuale), (self._aggiungiPercentualeColoreArticoloText, wx.ID_ANY, wx.EXPAND),
             (anticipo), (self._aggiungiAnticipoColoreArticoloText, wx.ID_ANY, wx.EXPAND),
             (programma_c12), (self._aggiungiProgrammaC12ArticoloText, wx.ID_ANY, wx.EXPAND),
             (programma_c25), (self._aggiungiProgrammaC25ArticoloText, wx.ID_ANY, wx.EXPAND),
+            (programma_hp12), (self._aggiungiProgrammaHP12ArticoloText, wx.ID_ANY, wx.EXPAND),
             (data), (self._aggiungiDataArticoloPicker, wx.ID_ANY, wx.EXPAND),
             (ora), (self._aggiungiOraArticoloPicker, wx.ID_ANY, wx.EXPAND),
             (pad1), (self._aggiungiArticoloBtn, wx.ID_ANY, wx.ALIGN_RIGHT)
@@ -98,4 +115,57 @@ class eDBMAddArticoloDash(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetSizerAndFit(hbox)
         hbox.Fit(self)
         fgs.Fit(self)
+
+    def _OnClick(self, evt):
+        try :
+
+            # lettura dei dati inseriti dall'utente
+            codice = self._aggiungiCodiceArticoloText.GetValue()
+            descrizione = self._aggiungiDescrizioneArticoloText.GetValue()
+            peso = int(self._aggiungiPesoArticoloText.GetValue())
+            rapporto = int(self._aggiungiRapportoArticoloText.GetValue())
+            inserto = self._aggiungiInsertoArticoloText.GetValue()
+            quantita_str = self._aggiungiQuantitaArticoloText.GetValue()
+            if quantita_str is not None:
+                if quantita_str.isdigit():
+                    quantita = int(quantita_str)
+            colore = self._aggiungiColoreArticoloText.GetValue()
+            percentuale_colore = int(self._aggiungiPercentualeColoreArticoloText.GetValue())
+            anticipo_colore = int(self._aggiungiAnticipoColoreArticoloText.GetValue())
+            programma_c12 = int(self._aggiungiProgrammaC12ArticoloText.GetValue())
+            programma_c25 = int(self._aggiungiProgrammaC25ArticoloText.GetValue())
+            programma_hp12 = int(self._aggiungiProgrammaHP12ArticoloText.GetValue())
+            data = self._aggiungiDataArticoloPicker.GetValue()
+            ora = self._aggiungiOraArticoloPicker.GetValue()
+
+            # creazione dell'oggetto
+            articolo = eDBMArticolo()
+
+            articolo.setCodice(codice)
+            if descrizione is not None:
+                articolo.setDescrizione(descrizione)
+            articolo.setPeso(peso)
+            articolo.setRapporto(rapporto)
+            articolo.setInserto(inserto)
+            if quantita_str is not None:
+                articolo.setQuantita(quantita)
+            articolo.setColore(colore)
+            articolo.setPercentualeColore(percentuale_colore)
+            articolo.setAnticipoColore(anticipo_colore)
+            articolo.setProgrammaC12(programma_c12)
+            articolo.setProgrammaC25(programma_c25)
+            articolo.setProgrammaHP12(programma_hp12)
+            articolo.setData(data)
+            articolo.setOra(ora)
+
+            # creazione della query
+
+        except eDBMException as e:
+            eDBMMessageDialog("Errore aggiunta articolo", e, True)
+
+        except Exception as ex:
+            track = traceback.format_exc()
+            eDBMMessageDialog("Errore aggiunta articolo", track, True)
+
+
 
