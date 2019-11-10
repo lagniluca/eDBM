@@ -25,10 +25,11 @@ class eDBMWindow(wx.Frame):
         super(eDBMWindow, self).__init__(parent, title='eDBM - Produzione')
 
         self._content_manager = wx.aui.AuiManager(self)
-        self._current_central_panel = None # reference al pannello centrale corrente
+        self._current_central_panel = None  # reference al pannello centrale corrente
 
+        self._alterMateriePrimePage = False
 
-        #Manager del database
+        # Manager del database
         self._dbm = None
 
         self._InitUI()
@@ -73,7 +74,7 @@ class eDBMWindow(wx.Frame):
         self._current_central_panel = pan
 
     def _ShowMateriePrimePage(self):
-        pan = eDBMShowMateriePrimePage(self, self._dbm)
+        pan = eDBMShowMateriePrimePage(self, self._dbm, self._alterMateriePrimePage)
         info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
         self._content_manager.AddPane(pan, info1)
         self._content_manager.Update()
@@ -85,8 +86,8 @@ class eDBMWindow(wx.Frame):
         self._toolbar.AddSeparator()
         self._infoTool = self._toolbar.AddTool(200, 'Info', wx.Bitmap('info.png'))
         self._toolbar.AddSeparator()
-        #self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
-        #self._toolbar.AddSeparator()
+        # self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
+        # self._toolbar.AddSeparator()
         self._sottoscorteTool = self._toolbar.AddTool(400, 'Sottoscorte', wx.Bitmap('sottoscorte.png'))
 
         self._toolbar.Realize()
@@ -95,7 +96,7 @@ class eDBMWindow(wx.Frame):
 
         self._toolbar.EnableTool(100, False)
         self._toolbar.EnableTool(200, True)
-        #self._toolbar.EnableTool(300, False)
+        # self._toolbar.EnableTool(300, False)
         self._toolbar.EnableTool(400, True)
 
     # Method used for displaying the connection panel
@@ -172,6 +173,7 @@ class eDBMWindow(wx.Frame):
         self._visualizzaMPItem = self._mpMenu.Append(wx.ID_ANY, 'Visualizza materie prime')
 
         self.Bind(wx.EVT_MENU, self._AggiungiMateriaPrimaDBPageLoader, self._aggiungiMPItem)
+        self.Bind(wx.EVT_MENU, self._ModificaMateriePrimeDBPageLoader, self._modificaMPItem)
         self.Bind(wx.EVT_MENU, self._VisualizzaMateriePrimeDBPageLoader, self._visualizzaMPItem)
 
         self._menubar.Append(self._mpMenu, '&Materie prime')
@@ -235,6 +237,12 @@ class eDBMWindow(wx.Frame):
 
     def _VisualizzaMateriePrimeDBPageLoader(self, evt):
         self._CleanWindowsCentralPanel()
+        self._alterMateriePrimePage = False
+        self._ShowMateriePrimePage()
+
+    def _ModificaMateriePrimeDBPageLoader(self, evt):
+        self._CleanWindowsCentralPanel()
+        self._alterMateriePrimePage = True
         self._ShowMateriePrimePage()
 
     def _OnSottoscorteClicked(self, evt):
@@ -244,6 +252,3 @@ class eDBMWindow(wx.Frame):
     def aggiornaVisualizzaMateriePrime(self):
         self._CleanWindowsCentralPanel()
         self._ShowMateriePrimePage()
-
-
-

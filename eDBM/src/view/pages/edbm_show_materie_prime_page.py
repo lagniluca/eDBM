@@ -14,7 +14,7 @@ from eDBM.src.view.pages.components.edbm_show_materie_prime_dash import eDBMShow
 
 
 class eDBMShowMateriePrimePage(wx.Panel):
-    def __init__(self, parent, dbconn):
+    def __init__(self, parent, dbconn, alter):
         super(eDBMShowMateriePrimePage, self).__init__(parent)
 
         self._dbconn = dbconn
@@ -26,7 +26,7 @@ class eDBMShowMateriePrimePage(wx.Panel):
         self._visualizzaMateriePrimeTab = wx.SplitterWindow(self._notebook, style=wx.SP_3DSASH)
         box = wx.BoxSizer(wx.VERTICAL)
 
-        self._pan2 = eDBMMateriePrimeGridPanel(self._visualizzaMateriePrimeTab, parent, dbconn, True)
+        self._pan2 = eDBMMateriePrimeGridPanel(self._visualizzaMateriePrimeTab, parent, dbconn, alter)
         self._pan1 = eDBMShowMateriePrimeDash(self._visualizzaMateriePrimeTab, self._dbconn, self._pan2)
 
         box.Add(self._pan1, wx.ID_ANY, wx.EXPAND | wx.ALL)
