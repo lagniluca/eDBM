@@ -4,7 +4,6 @@
 Classe che modella un record di produzione
 """
 from eDBM.src.model.exceptions.edbm_exception import eDBMException
-from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
 
 class eDBMProduzione:
     def __init__(self):
