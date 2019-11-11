@@ -16,7 +16,6 @@ import pyodbc
 
 from eDBM.src.model.edbm_materia_prima import eDBMMateriaPrima
 from eDBM.src.model.exceptions.edbm_exception import eDBMException
-from eDBM.src.view.pages.components.edbm_delete_dialog import eDBMDeleteDialog
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
 
 
@@ -143,13 +142,18 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
 
         if self._alter_flag :
             self._modificaBtn = wx.Button(self, wx.ID_ANY, u'Modifica')
-            self._modificaBtn.SetBackgroundColour(wx.RED)
+            self._modificaBtn.SetBackgroundColour(wx.GREEN)
             self._modificaBtn.Bind(wx.EVT_BUTTON, self._eseguiModifiche)
+            self._eliminaBtn = wx.Button(self, wx.ID_ANY, u'Elimina')
+            self._eliminaBtn.SetBackgroundColour(wx.RED)
+            self._eliminaBtn.Bind(wx.EVT_BUTTON, self._eseguiEliminazioni)
+
 
         vbox.Add(self._aggiornaBtn, flag=wx.LEFT|wx.TOP, border=10)
 
         if self._alter_flag :
-            vbox.Add(self._modificaBtn, flag=wx.LEFT|wx.CENTER, border=10)
+            vbox.Add(self._modificaBtn, flag=wx.LEFT| wx.CENTER, border=10)
+            vbox.Add(self._eliminaBtn, flag=wx.LEFT | wx.BOTTOM, border=10)
 
         # Example of column header setting
         # self._grid.SetColLabelValue(0, "ID")
@@ -300,6 +304,10 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
                 self._dbm.connessione().commit()
             pos = pos + 1
 
+        # aggiorno la pagina
+        self._window.aggiornaVisualizzaMateriePrime()
+
+    def _eseguiEliminazioni(self, event):
         # esecuzione della query di cancellazione
         for deleted_mp in self._table_content_deleted:
             query = deleted_mp.generaRimuoviMateriaPrimaQuery()

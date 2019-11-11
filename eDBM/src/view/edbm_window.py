@@ -48,6 +48,19 @@ class eDBMWindow(wx.Frame):
 
     def _ShowHomePage(self):
         self._loginPanel.Show(False)
+        #panel = wx.Panel(self)
+        #fgs = wx.FlexGridSizer(1, 1, 5, 5)
+        #pic = wx.Bitmap("lg.png", wx.BITMAP_TYPE_ANY)
+        #button=wx.BitmapButton(panel, -1, pic)
+        #button.Enable(False)
+        #fgs.Add(button, wx.ID_ANY, wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP | wx.BOTTOM)
+        #fgs.AddGrowableCol(0, 1)
+        #fgs.AddGrowableRow(0, 1)
+        #panel.SetSizer(fgs)
+        #fgs.Fit(panel)
+        #info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
+        #self._content_manager.AddPane(panel, info1)
+        #self._current_central_panel = panel
         self._content_manager.Update()
 
     # Articoli
