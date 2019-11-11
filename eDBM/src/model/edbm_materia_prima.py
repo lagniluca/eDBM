@@ -1,6 +1,32 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from eDBM.src.model.exceptions.edbm_exception import eDBMException
 
+def generaVisualizzaMateriePrimeQuery(codice, descrizione, data):
+    query = None
+
+    if (codice is not None) or (descrizione is not None) or (data is not None):
+
+        query = "SELECT * FROM materie_prime WHERE "
+        if codice is not None :
+            query += "Codice='" + str(codice) +"'"
+            if (descrizione is not None) or (data is not None) :
+                query += " AND "
+
+        if descrizione is not None:
+            query += " Descrizione='" + str(descrizione) + "'"
+            if data is not None:
+                query += " AND "
+
+        if data is not None:
+            data_eur = datetime.datetime.strptime(data, '%m/%d/%Y')
+            data_iso = data_eur.strftime('%Y-%m-%d')
+            print(type(data))
+            query += "Data=#" + str(data) + "#"
+    print(query)
+
+    return query
 
 class eDBMMateriaPrima:
 
@@ -192,6 +218,11 @@ class eDBMMateriaPrima:
         if not data:
             return False
 
+        try:
+            datetime.datetime.strptime(data, "%d/%m/%Y")
+        except ValueError:
+            return False
+
         return True
 
     def confrontaData(self, data):
@@ -217,6 +248,11 @@ class eDBMMateriaPrima:
             return False
 
         if not ora :
+            return False
+
+        try:
+            datetime.datetime.strptime(ora, "%H:%M:%S")
+        except ValueError:
             return False
 
         return True
@@ -269,6 +305,11 @@ class eDBMMateriaPrima:
             return False
 
         if not dataDDT :
+            return False
+
+        try:
+            datetime.datetime.strptime(dataDDT, "%H:%M:%S")
+        except ValueError:
             return False
 
         return True

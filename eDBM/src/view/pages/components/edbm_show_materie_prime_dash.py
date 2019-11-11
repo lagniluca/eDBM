@@ -39,8 +39,7 @@ class eDBMShowMateriePrimeDash(wx.lib.scrolledpanel.ScrolledPanel):
         self._dataMPPicker.Enable(False)
 
         # ora
-        self._oraMPCheck = wx.CheckBox(self, label='ora:')
-        self._oraMPCheck.Enable(False)
+        self._oraMPText = wx.StaticText(self, label='ultimo refresh:')
         self._oraMPPicker = wx.adv.TimePickerCtrl(self, wx.ID_ANY)
         self._oraMPPicker.Enable(False)
 
@@ -53,17 +52,15 @@ class eDBMShowMateriePrimeDash(wx.lib.scrolledpanel.ScrolledPanel):
         self._codiceMPCheck.Bind(wx.EVT_CHECKBOX, self._filtraCodiceMPChecked)
         self._descrizioneMPCheck.Bind(wx.EVT_CHECKBOX, self._filtraDescrizioneMPChecked)
         self._dataMPCheck.Bind(wx.EVT_CHECKBOX, self._filtraDataMPChecked)
-        self._oraMPCheck.Bind(wx.EVT_CHECKBOX, self._filtraOraMPChecked)
 
         # filtra
-        self._filtraMPBtn = wx.Button(self, label='filtra')
-        #self._filtraMPBtn.Enable(False)
+        self._filtraMPBtn = wx.Button(self, label='Filtra')
         self._filtraMPBtn.Bind(wx.EVT_BUTTON, self._filtra)
 
         fgs.AddMany([(self._codiceMPCheck), (self._codiceMPText, 1, wx.EXPAND | wx.ALL),  # (pad1),
                      (self._descrizioneMPCheck), (self._descrizioneMPText, 1, wx.EXPAND | wx.ALL),  # (pad2),
                      (self._dataMPCheck), (self._dataMPPicker, 1, wx.EXPAND | wx.ALL),
-                     (self._oraMPCheck), (self._oraMPPicker, 1, wx.EXPAND | wx.ALL),
+                     (self._oraMPText), (self._oraMPPicker, 1, wx.EXPAND | wx.ALL),
                      (pad1), (pad2), (pad3), (self._filtraMPBtn, wx.ID_ANY, wx.ALIGN_RIGHT)
                      ])
 
@@ -85,7 +82,6 @@ class eDBMShowMateriePrimeDash(wx.lib.scrolledpanel.ScrolledPanel):
             enabled = True
 
         self._codiceMPText.Enable(enabled)
-        #self._abilitaFiltraBtn()
 
     def _filtraDescrizioneMPChecked(self, e):
         sender = e.GetEventObject()
@@ -96,7 +92,6 @@ class eDBMShowMateriePrimeDash(wx.lib.scrolledpanel.ScrolledPanel):
             enabled = True
 
         self._descrizioneMPText.Enable(enabled)
-        #self._abilitaFiltraBtn()
 
     def _filtraDataMPChecked(self, e):
         sender = e.GetEventObject()
@@ -107,34 +102,11 @@ class eDBMShowMateriePrimeDash(wx.lib.scrolledpanel.ScrolledPanel):
             enabled = True
 
         self._dataMPPicker.Enable(enabled)
-        #self._abilitaFiltraBtn()
-
-    def _filtraOraMPChecked(self, e):
-        sender = e.GetEventObject()
-        isChecked = sender.GetValue()
-        enabled = False
-
-        if isChecked:
-            enabled = True
-
-        self._oraMPPicker.Enable(enabled)
-        #self._abilitaFiltraBtn()
-
-    def _abilitaFiltraBtn(self):
-        enable = False
-
-        enable = enable or self._codiceMPCheck.IsChecked()
-        enable = enable or self._descrizioneMPCheck.IsChecked()
-        enable = enable or self._dataMPCheck.IsChecked()
-        enable = enable or self._oraMPCheck.IsChecked()
-
-        self._filtraMPBtn.Enable(enable)
 
     def _filtra(self, evt):
         codice = None
         descrizione = None
         data = None
-        ora = None
 
         if self._codiceMPCheck.IsChecked() :
             codice = str(self._codiceMPText.GetValue())
@@ -148,11 +120,7 @@ class eDBMShowMateriePrimeDash(wx.lib.scrolledpanel.ScrolledPanel):
             data_dt = self._dataMPPicker.GetValue()
             data = data_dt.Format("%d/%m/%Y")
 
-        if self._oraMPCheck.IsChecked():
-            ora_dt = self._oraMPPicker.GetValue()
-            ora = ora_dt.Format("%H:%M:%S")
-
-        self._gridPanel.filtraRisultato(codice, descrizione, data, ora)
+        self._gridPanel.filtraRisultato(codice, descrizione, data)
 
 
 

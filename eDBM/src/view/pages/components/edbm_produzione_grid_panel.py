@@ -16,9 +16,7 @@ import wx.grid
 import pyodbc
 
 # librerie applicazione
-from eDBM.src.model.edbm_produzione import eDBMProduzione
-from eDBM.src.model.exceptions.edbm_exception import eDBMException
-from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
+from eDBM.src.model.edbm_produzione import eDBMProduzione, generaVisualizzaProduzioneQuery
 
 # numero campi
 PRODUZIONE_NUMERO_CAMPI = 27
@@ -89,143 +87,129 @@ class eDBMProduzioneGridPanel(wx.Panel):
         self._grid.SetColLabelValue(PRODUZIONE_INDICE_LOTTO_POLIOLO, "Lotto poliolo")
         self._grid.SetColLabelValue(PRODUZIONE_INDICE_LOTTO_ISOCIANATO, "Lotto isocianato")
         self._grid.SetColLabelValue(PRODUZIONE_INDICE_LOTTO_COLORE, "Lotto colore")
+        self._grid.SetColLabelValue(PRODUZIONE_INDICE_LOTTO_ARTICOLO, "Lotto articolo")
         self._grid.SetColLabelValue(PRODUZIONE_INDICE_LOTTO_INSERTO, "Lotto inserto")
         self._grid.SetColLabelValue(PRODUZIONE_INDICE_BADGE, "Badge")
 
+    def _immettiStringa(self, dato):
+        stringa = ""
+
+        if (dato is None) or (not dato):
+            stringa = " "
+        else:
+            stringa = dato
+
+        if dato == 'None':
+            stringa = " "
+
+        return stringa
+
     def _InitGridContent(self):
-        record = 0
         read_only = True
+        record = 0
+        current_rows = self._grid.GetNumberRows()
 
         for prod in self._table_content_original:
 
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ID, str(prod.getID()))
+            if record >= current_rows:
+                self._grid.AppendRows(1)
+                record = current_rows
+                current_rows = current_rows + 1
+
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ID, self._immettiStringa(str(prod.getID())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_ID, True)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LINEA, str(prod.getLinea()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LINEA, self._immettiStringa(str(prod.getLinea())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_LINEA, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ARTICOLO, str(prod.getArticolo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ARTICOLO, self._immettiStringa(str(prod.getArticolo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_ARTICOLO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_N_STAMPO, str(prod.getNumeroStampo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_N_STAMPO, self._immettiStringa(str(prod.getNumeroStampo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_N_STAMPO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PESO, str(prod.getPeso()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PESO, self._immettiStringa(str(prod.getPeso())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_PESO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_RAPPORTO, str(prod.getRapporto()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_RAPPORTO, self._immettiStringa(str(prod.getRapporto())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_RAPPORTO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_TEMPO_COLATA, str(prod.getTempoColata()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_TEMPO_COLATA, self._immettiStringa(str(prod.getTempoColata())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_TEMPO_COLATA, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_QUANTITA_POLIOLO, str(prod.getQuantitaPoliolo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_QUANTITA_POLIOLO, self._immettiStringa(str(prod.getQuantitaPoliolo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_QUANTITA_POLIOLO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_FLUSSO_POLIOLO, str(prod.getFlussoPoliolo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_FLUSSO_POLIOLO, self._immettiStringa(str(prod.getFlussoPoliolo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_FLUSSO_POLIOLO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_TEMPERATURA_POLIOLO, str(prod.getTemperaturaPoliolo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_TEMPERATURA_POLIOLO, self._immettiStringa(str(prod.getTemperaturaPoliolo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_TEMPERATURA_POLIOLO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PRESSIONE_POLIOLO, str(prod.getPressionePoliolo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PRESSIONE_POLIOLO, self._immettiStringa(str(prod.getPressionePoliolo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_PRESSIONE_POLIOLO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_QUANTITA_ISOCIANATO, str(prod.getQuantitaIsocianato()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_QUANTITA_ISOCIANATO, self._immettiStringa(str(prod.getQuantitaIsocianato())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_QUANTITA_ISOCIANATO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_FLUSSO_ISOCIANATO, str(prod.getFlussoIsocianato()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_FLUSSO_ISOCIANATO, self._immettiStringa(str(prod.getFlussoIsocianato())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_FLUSSO_ISOCIANATO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_TEMPERATURA_ISOCIANATO, str(prod.getTemperaturaIsocianato()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_TEMPERATURA_ISOCIANATO,
+                                    self._immettiStringa(str(prod.getTemperaturaIsocianato())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_TEMPERATURA_ISOCIANATO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PRESSIONE_ISOCIANATO, str(prod.getPressioneIsocianato()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PRESSIONE_ISOCIANATO, self._immettiStringa(str(prod.getPressioneIsocianato())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_PRESSIONE_ISOCIANATO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_N_COLORE, str(prod.getNumColore()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_N_COLORE, self._immettiStringa(str(prod.getNumColore())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_N_COLORE, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PERCENTUALE_COLORE, str(prod.getPercentualeColore()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_PERCENTUALE_COLORE, self._immettiStringa(str(prod.getPercentualeColore())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_PERCENTUALE_COLORE, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_FLUSSO_COLORE, str(prod.getFlussoColore()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_FLUSSO_COLORE, self._immettiStringa(str(prod.getFlussoColore())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_FLUSSO_COLORE, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ANTICIPO_COLORE, str(prod.getAnticipoColore()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ANTICIPO_COLORE, self._immettiStringa(str(prod.getAnticipoColore())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_ANTICIPO_COLORE, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_DATA, str(prod.getData()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_DATA, self._immettiStringa(str(prod.getData())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_DATA, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ORA, str(prod.getOra()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_ORA, self._immettiStringa(str(prod.getOra())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_ORA, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_POLIOLO, str(prod.getLottoPoliolo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_POLIOLO, self._immettiStringa(str(prod.getLottoPoliolo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_LOTTO_POLIOLO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_ISOCIANATO, str(prod.getLottoIsocianato()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_ISOCIANATO, self._immettiStringa(str(prod.getLottoIsocianato())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_LOTTO_ISOCIANATO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_COLORE, str(prod.getLottoColore()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_COLORE, self._immettiStringa(str(prod.getLottoColore())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_LOTTO_COLORE, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_ARTICOLO, str(prod.getLottoArticolo()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_ARTICOLO, self._immettiStringa(str(prod.getLottoArticolo())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_LOTTO_ARTICOLO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_INSERTO, str(prod.getLottoInserto()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_LOTTO_INSERTO, self._immettiStringa(str(prod.getLottoInserto())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_LOTTO_INSERTO, read_only)
-
-            self._grid.SetCellValue(record, PRODUZIONE_INDICE_BADGE, str(prod.getBadge()))
+            self._grid.SetCellValue(record, PRODUZIONE_INDICE_BADGE, self._immettiStringa(str(prod.getBadge())))
             self._grid.SetReadOnly(record, PRODUZIONE_INDICE_BADGE, read_only)
 
             record = record + 1
 
     def _InitUI(self):
-        self._RetriveTableContent()
-
         self._grid = wx.grid.Grid(self)
-        self._grid.CreateGrid(len(self._table_content_original), PRODUZIONE_NUMERO_CAMPI)
+        self._grid.CreateGrid(0, PRODUZIONE_NUMERO_CAMPI)
 
         self._InitGridHeader()
         self._InitGridContent()
 
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        self._aggiornaBtn = wx.Button(self, wx.ID_ANY, u'Aggiorna')
-        self._aggiornaBtn.Bind(wx.EVT_BUTTON, self._aggiorna)
-
-        vbox.Add(self._aggiornaBtn, flag=wx.LEFT | wx.TOP, border=10)
-
         # Placement of the grid component inside the panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        fgs = wx.FlexGridSizer(1, 2, 9, 25)
+        fgs = wx.FlexGridSizer(1, 1, 9, 25)
 
         fgs.AddMany([
-            (vbox, wx.ID_ANY, wx.ALIGN_RIGHT),
             (self._grid, wx.ID_ANY, wx.EXPAND | wx.ALIGN_LEFT)
         ])
 
-        fgs.AddGrowableCol(1, 1)
+        fgs.AddGrowableCol(0, 1)
+        fgs.AddGrowableRow(0, 1)
 
         sizer.Add(fgs, proportion=1, flag=wx.ALL | wx.EXPAND, border=15)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def _RetriveTableContent(self):
+    def _RetriveTableContent(self, query):
         self._table_content_original = list()
-        query = "SELECT * FROM produzione_cosmec"
         cursor = self._dbm.connessione().cursor()
         cursor.execute(query)
 
-        for record in cursor.fetchall():
+        records = cursor.fetchall()
+        for record in records:
             # creazione dell'oggetto materia prima per ogni record
             prod = eDBMProduzione()
 
             prod.setID(int(record[PRODUZIONE_INDICE_ID]))
-            prod.setLinea(str(record[PRODUZIONE_INDICE_LINEA]))
-            prod.setArticolo(str(record[PRODUZIONE_INDICE_ARTICOLO]))
+            prod.setLinea(self._immettiStringa(str(record[PRODUZIONE_INDICE_LINEA])))
+            prod.setArticolo(self._immettiStringa(str(record[PRODUZIONE_INDICE_ARTICOLO])))
             prod.setNumeroStampo(int(record[PRODUZIONE_INDICE_N_STAMPO]))
             prod.setPeso(int(record[PRODUZIONE_INDICE_PESO]))
             prod.setRapporto(int(record[PRODUZIONE_INDICE_RAPPORTO]))
@@ -235,97 +219,42 @@ class eDBMProduzioneGridPanel(wx.Panel):
             prod.setTemperaturaPoliolo(int(record[PRODUZIONE_INDICE_TEMPERATURA_POLIOLO]))
             prod.setPressionePoliolo(int(record[PRODUZIONE_INDICE_PRESSIONE_POLIOLO]))
             prod.setQuantitaIsocianato(int(record[PRODUZIONE_INDICE_QUANTITA_ISOCIANATO]))
-            prod.setFlussoIsocianato((int(prod[PRODUZIONE_INDICE_FLUSSO_ISOCIANATO])))
-            prod.setTemperaturaIsocianato(int(prod[PRODUZIONE_INDICE_TEMPERATURA_ISOCIANATO]))
-            prod.setPressioneIsocianato(int(prod[PRODUZIONE_INDICE_PRESSIONE_ISOCIANATO]))
-            prod.setNumColore(int(prod[PRODUZIONE_INDICE_N_COLORE]))
-            prod.setPercentualeColore(int(prod[PRODUZIONE_INDICE_PERCENTUALE_COLORE]))
-            prod.setFlussoColore(int(prod[PRODUZIONE_INDICE_FLUSSO_COLORE]))
-            prod.setAnticipoColore(int(prod[PRODUZIONE_INDICE_ANTICIPO_COLORE]))
+            prod.setFlussoIsocianato(int(record[PRODUZIONE_INDICE_FLUSSO_ISOCIANATO]))
+            prod.setTemperaturaIsocianato(int(record[PRODUZIONE_INDICE_TEMPERATURA_ISOCIANATO]))
+            prod.setPressioneIsocianato(int(record[PRODUZIONE_INDICE_PRESSIONE_ISOCIANATO]))
+            prod.setNumColore(int(record[PRODUZIONE_INDICE_N_COLORE]))
+            prod.setPercentualeColore(int(record[PRODUZIONE_INDICE_PERCENTUALE_COLORE]))
+            prod.setFlussoColore(int(record[PRODUZIONE_INDICE_FLUSSO_COLORE]))
+            prod.setAnticipoColore(int(record[PRODUZIONE_INDICE_ANTICIPO_COLORE]))
             data = str(record[PRODUZIONE_INDICE_DATA].strftime("%d/%m/%Y"))
-            prod.setData(data)
+            prod.setData(self._immettiStringa(data))
             ora = str(record[PRODUZIONE_INDICE_ORA].strftime("%H:%M:%S"))
-            prod.setOra(str(ora))
-            prod.setLottoPoliolo(str(prod[PRODUZIONE_INDICE_LOTTO_POLIOLO]))
-            prod.setLottoIsocianato(str(prod[PRODUZIONE_INDICE_LOTTO_ISOCIANATO]))
-            prod.setLottoColore(str(prod[PRODUZIONE_INDICE_LOTTO_COLORE]))
-            prod.setLottoArticolo(str(prod[PRODUZIONE_INDICE_LOTTO_ARTICOLO]))
-            prod.setLottoInserto(str(prod[PRODUZIONE_INDICE_LOTTO_INSERTO]))
-            prod.setBadge(str(prod[PRODUZIONE_INDICE_BADGE]))
+            prod.setOra(self._immettiStringa(str(ora)))
+            prod.setLottoPoliolo(self._immettiStringa(str(record[PRODUZIONE_INDICE_LOTTO_POLIOLO])))
+            prod.setLottoIsocianato(self._immettiStringa(str(record[PRODUZIONE_INDICE_LOTTO_ISOCIANATO])))
+            prod.setLottoColore(self._immettiStringa(str(record[PRODUZIONE_INDICE_LOTTO_COLORE])))
+            prod.setLottoArticolo(self._immettiStringa(str(record[PRODUZIONE_INDICE_LOTTO_ARTICOLO])))
+            prod.setLottoInserto(self._immettiStringa(str(record[PRODUZIONE_INDICE_LOTTO_INSERTO])))
+            prod.setBadge(int(record[PRODUZIONE_INDICE_BADGE]))
 
             self._table_content_original.append(prod)
 
+        self._InitGridContent()
+
     def _aggiorna(self, evt):
-        self._window.aggiornaVisualizzaMateriePrime()
+        self._window.aggiornaVisualizzaProduzione()
 
-    def filtraRisultato(self, codice, descrizione, data, ora):
-        codice_flag = False
-        descrizione_flag = False
-        data_flag = False
-        ora_flag = False
+    def _refresh(self):
+        self._window.aggiornaVisualizzaProduzione()
 
-        if codice is not None:
-            if not codice:
-                pass
-            else:
-                codice_flag = True
+    def filtraRisultato(self, articolo, data):
 
-        if descrizione is not None:
-            descrizione_flag = True
+       query = generaVisualizzaProduzioneQuery(articolo, data)
 
-        if data is not None:
-            if not data:
-                pass
-            else:
-                data_flag = True
+       print(query)
 
-        if ora is not None:
-            if not ora:
-                pass
-            else:
-                ora_flag = True
+       if query is not None:
+           self._RetriveTableContent(query)
+       else:
+           self._refresh()
 
-        row = 0
-
-        for mp in self._table_content_original:
-            if codice_flag:
-                if codice != mp.getCodice():
-                    self._grid.HideRow(row)
-                    row = row + 1
-                    continue
-            else:
-                self._grid.ShowRow(row)
-
-            if descrizione_flag:
-                if mp.getDescrizione() is None:
-                    if not descrizione:
-                        self._grid.ShowRow(row)
-                    else:
-                        self._grid.HideRow(row)
-                        row = row + 1
-                        continue
-                else:
-                    if descrizione != mp.getDescrizione():
-                        self._grid.HideRow(row)
-                        row = row + 1
-                        continue
-            else:
-                self._grid.ShowRow(row)
-
-            if data_flag:
-                if data != mp.getData():
-                    self._grid.HideRow(row)
-                    row = row + 1
-                    continue
-            else:
-                self._grid.ShowRow(row)
-
-            if ora_flag:
-                if ora != mp.getOra():
-                    self._grid.HideRow(row)
-                    row = row + 1
-                    continue
-            else:
-                self._grid.ShowRow(row)
-
-            row = row + 1

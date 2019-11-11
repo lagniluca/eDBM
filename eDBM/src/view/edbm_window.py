@@ -13,10 +13,9 @@ import wx.aui
 from eDBM.src.controller.edbm_db_manager import eDBMDBManager
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
 from eDBM.src.view.pages.components.edbm_sottoscorte_dialog import eDBMSottoscorteDialog
-from eDBM.src.view.pages.edbm_add_articolo_page import eDBMAddArticoloPage
 from eDBM.src.view.pages.edbm_add_materia_prima_page import eDBMAddMateriaPrimaPage
-from eDBM.src.view.pages.edbm_show_articoli_page import eDBMShowArticoliPage
 from eDBM.src.view.pages.edbm_show_materie_prime_page import eDBMShowMateriePrimePage
+from eDBM.src.view.pages.edbm_show_produzione_page import eDBMShowProduzionePage
 
 
 class eDBMWindow(wx.Frame):
@@ -43,40 +42,13 @@ class eDBMWindow(wx.Frame):
 
         # window settings
         self.SetIcon(wx.Icon('logo.png', wx.BITMAP_TYPE_PNG))
-        self.SetSize((700, 500))
+        self.SetSize((1000, 800))
+        #self.SetSize(wx.DisplaySize())
         self.Center()
 
     def _ShowHomePage(self):
         self._loginPanel.Show(False)
-        #panel = wx.Panel(self)
-        #fgs = wx.FlexGridSizer(1, 1, 5, 5)
-        #pic = wx.Bitmap("lg.png", wx.BITMAP_TYPE_ANY)
-        #button=wx.BitmapButton(panel, -1, pic)
-        #button.Enable(False)
-        #fgs.Add(button, wx.ID_ANY, wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP | wx.BOTTOM)
-        #fgs.AddGrowableCol(0, 1)
-        #fgs.AddGrowableRow(0, 1)
-        #panel.SetSizer(fgs)
-        #fgs.Fit(panel)
-        #info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
-        #self._content_manager.AddPane(panel, info1)
-        #self._current_central_panel = panel
         self._content_manager.Update()
-
-    # Articoli
-    def _ShowArticoliPage(self):
-        pan = eDBMShowArticoliPage(self, self._dbm)
-        info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
-        self._content_manager.AddPane(pan, info1)
-        self._content_manager.Update()
-        self._current_central_panel = pan
-
-    def _AddArticoloPage(self):
-        pan = eDBMAddArticoloPage(self)
-        info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
-        self._content_manager.AddPane(pan, info1)
-        self._content_manager.Update()
-        self._current_central_panel = pan
 
     # Materie prime
     def _AddMateriaPrimaPage(self):
@@ -93,24 +65,33 @@ class eDBMWindow(wx.Frame):
         self._content_manager.Update()
         self._current_central_panel = pan
 
+    # produzione
+    def _ShowProduzionePage(self):
+        pan = eDBMShowProduzionePage(self, self._dbm)
+        info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
+        self._content_manager.AddPane(pan, info1)
+        self._content_manager.Update()
+        self._current_central_panel = pan
+
     def _InitToolBar(self):
         self._toolbar = self.CreateToolBar(style=wx.TB_BOTTOM)
         self._disconnettiTool = self._toolbar.AddTool(100, "Disconnetti", wx.Bitmap('logout.png'))
         self._toolbar.AddSeparator()
         self._infoTool = self._toolbar.AddTool(200, 'Info', wx.Bitmap('info.png'))
         self._toolbar.AddSeparator()
-        # self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
-        # self._toolbar.AddSeparator()
+        self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
+        self._toolbar.AddSeparator()
         self._sottoscorteTool = self._toolbar.AddTool(400, 'Sottoscorte', wx.Bitmap('sottoscorte.png'))
 
         self._toolbar.Realize()
 
+        self.Bind(wx.EVT_TOOL, self.OnAboutBox, self._infoTool)
         self.Bind(wx.EVT_TOOL, self._OnSottoscorteClicked, self._sottoscorteTool)
 
         self._toolbar.EnableTool(100, False)
         self._toolbar.EnableTool(200, True)
-        # self._toolbar.EnableTool(300, False)
-        self._toolbar.EnableTool(400, True)
+        self._toolbar.EnableTool(300, False)
+        self._toolbar.EnableTool(400, False)
 
     # Method used for displaying the connection panel
     def _InitLoginPanel(self):
@@ -140,7 +121,7 @@ class eDBMWindow(wx.Frame):
         # connection button
         pad4 = wx.StaticText(self._loginPanel, label='')  # padding element
         # pad5 = wx.StaticText(self._loginPanel, label='')  # padding element
-        self._connettiDBLoginBtn = wx.Button(self._loginPanel, wx.ID_ANY, u"connetti", wx.DefaultPosition,
+        self._connettiDBLoginBtn = wx.Button(self._loginPanel, wx.ID_ANY, u"Connetti", wx.DefaultPosition,
                                              wx.DefaultSize, 0)
         self._connettiDBLoginBtn.Bind(wx.EVT_BUTTON, self._connettiDB)
 
@@ -162,20 +143,6 @@ class eDBMWindow(wx.Frame):
     def _InitTopMenu(self):
         self._menubar = wx.MenuBar()
 
-        # Menu articoli
-        self._articoliMenu = wx.Menu()
-
-        self._aggiungiArticoloItem = self._articoliMenu.Append(wx.ID_ANY, 'Aggiungi articolo')
-        self._articoliMenu.AppendSeparator()
-        self._modificaArticoloItem = self._articoliMenu.Append(wx.ID_ANY, 'Modifica articolo')
-        self._articoliMenu.AppendSeparator()
-        self._visualizzaArticoloItem = self._articoliMenu.Append(wx.ID_ANY, 'Visualizza articolo')
-
-        self.Bind(wx.EVT_MENU, self._AggiungiArticoloDBPageLoader, self._aggiungiArticoloItem)
-        self.Bind(wx.EVT_MENU, self._VisualizzaArticoliDBPageLoader, self._visualizzaArticoloItem)
-
-        self._menubar.Append(self._articoliMenu, '&Articoli')
-
         # Menu materie prime
         self._mpMenu = wx.Menu()
 
@@ -193,8 +160,9 @@ class eDBMWindow(wx.Frame):
 
         # Menu produzione
         self._produzioneMenu = wx.Menu()
-
         self._visualizzaProduzioneItem = self._produzioneMenu.Append(wx.ID_ANY, 'Visualizza produzione')
+
+        self.Bind(wx.EVT_MENU, self._VisualizzaProduzioneDBPageLoader, self._visualizzaProduzioneItem)
 
         self._menubar.Append(self._produzioneMenu, '&Produzione')
 
@@ -222,7 +190,8 @@ class eDBMWindow(wx.Frame):
                 md.start()
                 self._loginPanel.Hide()
                 self._InitTopMenu()
-                self._ShowHomePage()
+                #self._ShowHomePage()
+                self._AddMateriaPrimaPage()
             else:
                 md = eDBMMessageDialog('Connessione database produzione', 'Connessione NON stabilita', True)
                 md.start()
@@ -231,17 +200,6 @@ class eDBMWindow(wx.Frame):
             track = traceback.format_exc()
             md = eDBMMessageDialog('Connessione database produzione - NON STABILITA - Eccezione lanciata', track, True)
             md.start()
-
-    # Articoli
-    def _VisualizzaArticoliDBPageLoader(self, evt):
-        self._CleanWindowsCentralPanel()
-        self._loginPanel.Hide()
-        self._ShowArticoliPage()
-
-    def _AggiungiArticoloDBPageLoader(self, evt):
-        self._CleanWindowsCentralPanel()
-        self._loginPanel.Hide()
-        self._AddArticoloPage()
 
     # Materie prime
     def _AggiungiMateriaPrimaDBPageLoader(self, evt):
@@ -258,6 +216,11 @@ class eDBMWindow(wx.Frame):
         self._alterMateriePrimePage = True
         self._ShowMateriePrimePage()
 
+    # produzione
+    def _VisualizzaProduzioneDBPageLoader(self, evt):
+        self._CleanWindowsCentralPanel()
+        self._ShowProduzionePage()
+
     def _OnSottoscorteClicked(self, evt):
         dia = eDBMSottoscorteDialog(None)
         dia.Show(True)
@@ -265,3 +228,29 @@ class eDBMWindow(wx.Frame):
     def aggiornaVisualizzaMateriePrime(self):
         self._CleanWindowsCentralPanel()
         self._ShowMateriePrimePage()
+
+    def aggiornaVisualizzaProduzione(self):
+        self._CleanWindowsCentralPanel()
+        self._ShowProduzionePage()
+
+    def OnAboutBox(self, e):
+            description = """
+                        Software per la gestione e supervisione delle materie prime e la supervisione della produzione       
+                          """
+
+            licence = """
+                    eDBM è concesso in licenza d'uso
+                      """
+
+            info = wx.adv.AboutDialogInfo()
+
+            info.SetIcon(wx.Icon('logo48.png', wx.BITMAP_TYPE_PNG))
+            info.SetName('eDBM')
+            info.SetVersion('1.0')
+            info.SetDescription(description)
+            info.SetCopyright('(C) 1995 - 2019 Giovanni Lagni Automazioni')
+            info.SetLicence(licence)
+            info.AddDeveloper('Luca Lagni')
+            info.AddDeveloper('Giovanni Lagni')
+
+            wx.adv.AboutBox(info)

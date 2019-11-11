@@ -4,19 +4,32 @@
 Class used for creating a grid component
 """
 
-# wx Libraries
-import datetime
+import pyodbc
+
 import traceback
 
 import wx
 import wx.grid
 
-# Access libraries
-import pyodbc
-
-from eDBM.src.model.edbm_materia_prima import eDBMMateriaPrima
+from eDBM.src.model.edbm_materia_prima import eDBMMateriaPrima, generaVisualizzaMateriePrimeQuery
 from eDBM.src.model.exceptions.edbm_exception import eDBMException
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
+
+# numero di campi delle materie prime
+MP_CAMPI = 10
+
+# indici materie prime
+MP_INDICE_ID = 0
+MP_INDICE_CODICE = 1
+MP_INDICE_DESCRIZIONE = 2
+MP_INDICE_LOTTO = 3
+MP_INDICE_REGISTRAZIONE = 4
+MP_INDICE_TIPO = 5
+MP_INDICE_DATA = 6
+MP_INDICE_ORA = 7
+MP_INDICE_DDT = 8
+MP_INDICE_DATA_DDT = 9
+
 
 
 class eDBMMateriePrimeGridPanel(wx.Panel):
@@ -37,10 +50,10 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
         self._InitUI()
 
     def _InitGridHeader(self):
-        position = 0
+        position = MP_INDICE_ID
 
         if self._alter_flag:
-            self._grid.SetColLabelValue(position, "<ELIMINA>")
+            self._grid.SetColLabelValue(position, "[ ELIMINA ]")
             position = position + 1
 
         self._grid.SetColLabelValue(position, "ID")
@@ -65,11 +78,21 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
 
     def _InitGridContent(self):
         row = 0
-        column = 0
         read_only = not self._alter_flag
+        current_rows = self._grid.GetNumberRows()
+
+        dati = len(self._table_content_original)
+
+        if dati < current_rows :
+            self._grid.DeleteRows(dati - 1, (current_rows - 1) - (dati -1), True)
 
         for mp in self._table_content_original:
             column = 0
+
+            if row >= current_rows:
+                self._grid.AppendRows(1)
+                row = current_rows
+                current_rows = current_rows + 1
 
             if self._alter_flag :
                 strList = list()
@@ -117,30 +140,19 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
 
             row = row + 1
 
-    def _InitGrid(self):
-        self._RetriveTableContent()
-        # Grid component
-        self._grid = wx.grid.Grid(self)
-        if self._alter_flag :
-            self._grid.CreateGrid(len(self._table_content_original), 11)
-            self._grid.Bind(wx.grid.EVT_GRID_CELL_CHANGED, self._CellChanged)
-        else:
-            self._grid.CreateGrid(len(self._table_content_original), 10)
-
-        self._InitGridHeader()
-        self._InitGridContent()
-
     # Method used for defying the UI of the panel
     def _InitUI(self):
-        #self._grid = wx.grid.Grid(self)
-        self._InitGrid()
+        self._grid = wx.grid.Grid(self)
+        if self._alter_flag:
+            self._grid.CreateGrid(0, MP_CAMPI + 1)
+            self._grid.Bind(wx.grid.EVT_GRID_CELL_CHANGED, self._CellChanged)
+        else:
+            self._grid.CreateGrid(0, MP_CAMPI)
 
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        self._aggiornaBtn = wx.Button(self, wx.ID_ANY, u'Aggiorna')
-        self._aggiornaBtn.Bind(wx.EVT_BUTTON, self._aggiorna)
+        self._InitGridHeader()
 
         if self._alter_flag :
+            vbox = wx.BoxSizer(wx.VERTICAL)
             self._modificaBtn = wx.Button(self, wx.ID_ANY, u'Modifica')
             self._modificaBtn.SetBackgroundColour(wx.GREEN)
             self._modificaBtn.Bind(wx.EVT_BUTTON, self._eseguiModifiche)
@@ -148,8 +160,6 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
             self._eliminaBtn.SetBackgroundColour(wx.RED)
             self._eliminaBtn.Bind(wx.EVT_BUTTON, self._eseguiEliminazioni)
 
-
-        vbox.Add(self._aggiornaBtn, flag=wx.LEFT|wx.TOP, border=10)
 
         if self._alter_flag :
             vbox.Add(self._modificaBtn, flag=wx.LEFT| wx.CENTER, border=10)
@@ -170,45 +180,53 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
 
         # Placement of the grid component inside the panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        fgs = wx.FlexGridSizer(1, 2, 9, 25)
+        if self._alter_flag :
+            fgs = wx.FlexGridSizer(1, 2, 9, 25)
 
-        fgs.AddMany([
-            (vbox, wx.ID_ANY, wx.ALIGN_RIGHT),
-            (self._grid, wx.ID_ANY, wx.EXPAND | wx.ALIGN_LEFT)
-        ])
+            fgs.AddMany([
+                (vbox, wx.ID_ANY, wx.ALIGN_RIGHT),
+                (self._grid, wx.ID_ANY, wx.EXPAND | wx.ALIGN_LEFT)
+            ])
 
-        fgs.AddGrowableCol(1, 1)
+            fgs.AddGrowableCol(1, 1)
+        else:
+            fgs = wx.FlexGridSizer(1, 1, 9, 25)
+            fgs.AddMany([
+                (self._grid, wx.ID_ANY, wx.EXPAND | wx.ALIGN_LEFT)
+            ])
+
+            fgs.AddGrowableCol(0, 1)
+        fgs.AddGrowableRow(0, 1)
 
         sizer.Add(fgs, proportion=1, flag=wx.ALL | wx.EXPAND, border=15)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def _RetriveTableContent(self):
+    def _RetriveTableContent(self, query):
         self._table_content_original = list()
-        query = "SELECT * FROM materie_prime"
+        self._table_content_altered = list()
+        self._table_content_deleted = list()
         cursor = self._dbm.connessione().cursor()
         cursor.execute(query)
-        # self._dbm.connessione().commit()
 
         for record in cursor.fetchall():
             # creazione dell'oggetto materia prima per ogni record
             mp = eDBMMateriaPrima()
 
-            mp.setID(int(record[0]))
-            mp.setCodice(record[1])
-            if record[2] is not None:
-                mp.setDescrizione(record[2])
-            mp.setLotto(record[3])
-            mp.setRegistrazione(record[4])
-            mp.setTipo(int(record[5]))
-            data = str(record[6].strftime("%d/%m/%Y"))
+            mp.setID(int(record[MP_INDICE_ID]))
+            mp.setCodice(record[MP_INDICE_CODICE])
+            mp.setDescrizione(record[MP_INDICE_DESCRIZIONE])
+            mp.setLotto(record[MP_INDICE_LOTTO])
+            mp.setRegistrazione(record[MP_INDICE_REGISTRAZIONE])
+            mp.setTipo(int(record[MP_INDICE_TIPO]))
+            data = str(record[MP_INDICE_DATA].strftime("%d/%m/%Y"))
             mp.setData(data)
-            ora = str(record[7].strftime("%H:%M:%S"))
+            ora = str(record[MP_INDICE_ORA].strftime("%H:%M:%S"))
             mp.setOra(str(ora))
-            if record[8] is not None:
-                mp.setDDT(record[8])
-            data_ddt = str(record[9].strftime("%H:%M:%S"))
+            print(record[MP_INDICE_DATA])
+            mp.setDDT(record[MP_INDICE_DDT])
+            data_ddt = str(record[MP_INDICE_DATA_DDT].strftime("%H:%M:%S"))
             mp.setDataDDT(data_ddt)
 
             # aggiunta alla lista dell'oggetto materia prima
@@ -217,81 +235,18 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
         if self._alter_flag:
             self._table_content_altered = self._table_content_original.copy()
 
+        self._InitGridContent()
+
     def _aggiorna(self, evt):
-        #self._InitGrid()
         self._window.aggiornaVisualizzaMateriePrime()
 
-    def filtraRisultato(self, codice, descrizione, data, ora):
-        codice_flag = False
-        descrizione_flag = False
-        data_flag = False
-        ora_flag = False
+    def filtraRisultato(self, codice, descrizione, data):
+        query = generaVisualizzaMateriePrimeQuery(codice, descrizione, data)
 
-        if codice is not None:
-            if not codice:
-                pass
-            else:
-                codice_flag = True
-
-        if descrizione is not None:
-            descrizione_flag = True
-
-        if data is not None:
-            if not data:
-                pass
-            else:
-                data_flag = True
-
-        if ora is not None:
-            if not ora:
-                pass
-            else:
-                ora_flag = True
-
-        row = 0
-
-        for mp in self._table_content_original:
-            if codice_flag:
-                if codice != mp.getCodice():
-                    self._grid.HideRow(row)
-                    row = row + 1
-                    continue
-            else:
-                self._grid.ShowRow(row)
-
-            if descrizione_flag:
-                if mp.getDescrizione() is None:
-                    if not descrizione:
-                        self._grid.ShowRow(row)
-                    else:
-                        self._grid.HideRow(row)
-                        row = row + 1
-                        continue
-                else:
-                    if descrizione != mp.getDescrizione():
-                        self._grid.HideRow(row)
-                        row = row + 1
-                        continue
-            else:
-                self._grid.ShowRow(row)
-
-            if data_flag:
-                if data != mp.getData():
-                    self._grid.HideRow(row)
-                    row = row + 1
-                    continue
-            else:
-                self._grid.ShowRow(row)
-
-            if ora_flag:
-                if ora != mp.getOra():
-                    self._grid.HideRow(row)
-                    row = row + 1
-                    continue
-            else:
-                self._grid.ShowRow(row)
-
-            row = row + 1
+        if query is not None:
+            self._RetriveTableContent(query)
+        else:
+            self._window.aggiornaVisualizzaMateriePrime()
 
     def _eseguiModifiche(self, event):
         # esecuzione della query di modifica
@@ -304,19 +259,39 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
                 self._dbm.connessione().commit()
             pos = pos + 1
 
+        row = 0
+        column = 0
+        while row < self._grid.GetNumberRows():
+            while column < self._grid.GetNumberCols():
+                self._grid.SetCellBackgroundColour(row, column, wx.WHITE)
+                column = column + 1
+            row = row + 1
+
+        self._grid.ForceRefresh()
+
         # aggiorno la pagina
-        self._window.aggiornaVisualizzaMateriePrime()
+        #self._window.aggiornaVisualizzaMateriePrime()
 
     def _eseguiEliminazioni(self, event):
         # esecuzione della query di cancellazione
         for deleted_mp in self._table_content_deleted:
+            row = 0
+
             query = deleted_mp.generaRimuoviMateriaPrimaQuery()
             cursor = self._dbm.connessione().cursor()
             cursor.execute(query)
             self._dbm.connessione().commit()
 
-        # aggiorno la pagina
-        self._window.aggiornaVisualizzaMateriePrime()
+            while row < self._grid.GetNumberRows():
+                cell_value = int(self._grid.GetCellValue(row, 1))
+                if cell_value == deleted_mp.getID():
+                    self._grid.DeleteRows(row, 1)
+                    break
+                else:
+                    row = row + 1
+
+        self._grid.ForceRefresh()
+        self._table_content_deleted = list()
 
 
     def _CellChanged(self, event):
@@ -391,5 +366,7 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
                 track = traceback.format_exc()
                 self._grid.SetCellValue(changed_row, changed_column, str(old_value))
                 eDBMMessageDialog("Errore modifica materia prima", "valore inserito non valido", True).start()
+
+        self._grid.ForceRefresh()
 
 

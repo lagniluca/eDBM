@@ -3,7 +3,27 @@
 """
 Classe che modella un record di produzione
 """
+import datetime
+
 from eDBM.src.model.exceptions.edbm_exception import eDBMException
+
+
+def generaVisualizzaProduzioneQuery(articolo, data):
+    query = None
+
+    if (articolo is not None) or (data is not None):
+
+        query = "SELECT * FROM produzione_cosmec WHERE "
+        if articolo is not None:
+            query += "articolo='" + str(articolo).upper() + "'"
+            if data is not None:
+                query += " AND "
+
+        if data is not None:
+            query += "data=#" + data + "#"
+
+    return query
+
 
 class eDBMProduzione:
     def __init__(self):
@@ -193,9 +213,6 @@ class eDBMProduzione:
         if not isinstance(temp_isocianato, int):
             return False
 
-        if temp_isocianato < 0:
-            return False
-
         return True
 
     def validaPressioneIsocianato(self, press_isocianato):
@@ -268,6 +285,11 @@ class eDBMProduzione:
         if not data:
             return False
 
+        try:
+            datetime.datetime.strptime(data, "%d/%m/%Y")
+        except ValueError:
+            return False
+
         return True
 
     def validaOra(self, ora):
@@ -278,6 +300,11 @@ class eDBMProduzione:
             return False
 
         if not ora:
+            return False
+
+        try:
+            datetime.datetime.strptime(ora, "%H:%M:%S")
+        except ValueError:
             return False
 
         return True
@@ -335,7 +362,7 @@ class eDBMProduzione:
             return False
 
         if badge < 0:
-            return  False
+            return False
 
         return True
 
@@ -502,6 +529,7 @@ class eDBMProduzione:
         else:
             raise eDBMException("badge non valido")
 
+
     # getters
     def getID(self):
         return self._id
@@ -583,3 +611,4 @@ class eDBMProduzione:
 
     def getBadge(self):
         return self._badge
+
