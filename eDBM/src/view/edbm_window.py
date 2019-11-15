@@ -6,11 +6,12 @@ Class that contains the code for the main window of the application
 
 # wx libraries
 import traceback
+from tkinter import Tk
 
 import wx
 import wx.aui
 
-from eDBM.src.controller.edbm_db_manager import eDBMDBManager
+from eDBM.src.controller.databases.edbm_db_manager import eDBMDBManager
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
 from eDBM.src.view.pages.components.edbm_sottoscorte_dialog import eDBMSottoscorteDialog
 from eDBM.src.view.pages.edbm_add_materia_prima_page import eDBMAddMateriaPrimaPage
@@ -20,13 +21,24 @@ from eDBM.src.view.pages.edbm_show_produzione_page import eDBMShowProduzionePage
 
 class eDBMWindow(wx.Frame):
 
-    def __init__(self, parent):
+    def __init__(self, parent, logs_file):
         super(eDBMWindow, self).__init__(parent, title='eDBM - Produzione')
 
         self._content_manager = wx.aui.AuiManager(self)
         self._current_central_panel = None  # reference al pannello centrale corrente
 
         self._alterMateriePrimePage = False
+
+        self.__sottoscorte_alert_dialog = None
+        #self.__sottoscorte_alert_dialog.Show(False)
+
+        self.__sottoscorte_logs = None
+        #self.__sottoscorte_logs.Show(False)
+
+        self.__sottoscorte_file = None
+        file = open(logs_file, "r")
+        input_file = file.read()
+        self.__logs_file = input_file
 
         # Manager del database
         self._dbm = None
@@ -52,7 +64,7 @@ class eDBMWindow(wx.Frame):
 
     # Materie prime
     def _AddMateriaPrimaPage(self):
-        pan = eDBMAddMateriaPrimaPage(self, self._dbm)
+        pan = eDBMAddMateriaPrimaPage(self, self, self._dbm)
         info1 = wx.aui.AuiPaneInfo().Center().Dockable(True)
         self._content_manager.AddPane(pan, info1)
         self._content_manager.Update()
@@ -75,8 +87,8 @@ class eDBMWindow(wx.Frame):
 
     def _InitToolBar(self):
         self._toolbar = self.CreateToolBar(style=wx.TB_BOTTOM)
-        self._disconnettiTool = self._toolbar.AddTool(100, "Disconnetti", wx.Bitmap('logout.png'))
-        self._toolbar.AddSeparator()
+        #self._disconnettiTool = self._toolbar.AddTool(100, "Disconnetti", wx.Bitmap('logout.png'))
+        #self._toolbar.AddSeparator()
         self._infoTool = self._toolbar.AddTool(200, 'Info', wx.Bitmap('info.png'))
         self._toolbar.AddSeparator()
         self._logsTool = self._toolbar.AddTool(300, 'Logs', wx.Bitmap('logs.png'))
@@ -87,10 +99,11 @@ class eDBMWindow(wx.Frame):
 
         self.Bind(wx.EVT_TOOL, self.OnAboutBox, self._infoTool)
         self.Bind(wx.EVT_TOOL, self._OnSottoscorteClicked, self._sottoscorteTool)
+        self.Bind(wx.EVT_TOOL, self._OnSottoscorteLogsClicked, self._logsTool)
 
-        self._toolbar.EnableTool(100, False)
+        #self._toolbar.EnableTool(100, False)
         self._toolbar.EnableTool(200, True)
-        self._toolbar.EnableTool(300, False)
+        self._toolbar.EnableTool(300, True)
         self._toolbar.EnableTool(400, False)
 
     # Method used for displaying the connection panel
@@ -222,8 +235,35 @@ class eDBMWindow(wx.Frame):
         self._ShowProduzionePage()
 
     def _OnSottoscorteClicked(self, evt):
-        dia = eDBMSottoscorteDialog(None)
-        dia.Show(True)
+        self.__sottoscorte_alert_dialog = eDBMSottoscorteDialog('eDBM -Sottoscorte Alert', 'sottoscorte.png')
+
+        file = open(self.__sottoscorte_file, "r")
+        rows = file.readlines()
+
+        self.__sottoscorte_alert_dialog.append_items(rows)
+
+        file.close()
+        file = open(self.__sottoscorte_file, "w")
+        file.write("")
+        file.close()
+
+        self._toolbar.EnableTool(400, False)
+
+    def _OnSottoscorteLogsClicked(self, evt):
+        self.__sottoscorte_logs =  eDBMSottoscorteDialog('eDBM -Sottoscorte Logs', 'logs.png')
+        file = open(self.__logs_file, "r")
+        rows = file.readlines()
+
+        self.__sottoscorte_logs.append_items(rows)
+        #self.__sottoscorte_logs.Show(True)
+
+    def added_sottoscorte_alert(self, sottoscorte_file):
+        self.__sottoscorte_file = sottoscorte_file
+        self._toolbar.EnableTool(400, True)
+
+    def aggiornaAggiungiMateriePrime(self):
+        self._CleanWindowsCentralPanel()
+        self._AddMateriaPrimaPage()
 
     def aggiornaVisualizzaMateriePrime(self):
         self._CleanWindowsCentralPanel()

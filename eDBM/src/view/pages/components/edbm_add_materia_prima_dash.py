@@ -11,16 +11,19 @@ import wx
 import wx.adv
 import wx.lib.scrolledpanel
 
+from eDBM.src.controller.exceptions.edbm_exception import eDBMException
+from eDBM.src.controller.files.edbm_lotto_generator import eDBMLottoGenerator
 from eDBM.src.model.edbm_materia_prima import eDBMMateriaPrima
-from eDBM.src.model.exceptions.edbm_exception import eDBMException
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
 
 
 class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
-    def __init__(self, parent, dbm):
+    def __init__(self, parent, window, dbm):
         super(eDBMAddMateriaPrimaDash, self).__init__(parent, style=wx.SIMPLE_BORDER)
 
         self._dbm = dbm
+
+        self.__window = window
 
         self.SetupScrolling()
         self._InitUI()
@@ -28,7 +31,7 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
     def _InitUI(self):
         # Layouts
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        fgs = wx.FlexGridSizer(10, 2, 9, 25)
+        fgs = wx.FlexGridSizer(9, 2, 9, 25)
 
         # codice
         codice = wx.StaticText(self, label='(*)codice:')
@@ -41,9 +44,13 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
         # lotto
         lotto = wx.StaticText(self, label='(*)lotto:')
         self._aggiungiLottoMPText = wx.TextCtrl(self)
+        self.__lotto_g = eDBMLottoGenerator()
+        lotto_str = self.__lotto_g.get_lotto()
+        self._aggiungiLottoMPText.SetValue(lotto_str)
+
 
         # registrazione
-        registrazione = wx.StaticText(self, label='(*)registrazione:')
+        registrazione = wx.StaticText(self, label='registrazione:')
         self._aggiungiRegistrazioneMPText = wx.TextCtrl(self)
 
         # tipo
@@ -65,7 +72,9 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
 
         # data ddt
         data_ddt = wx.StaticText(self, label='(*)data DDT:')
-        self._aggiungiDataDDTMPPicker = wx.adv.TimePickerCtrl(self, wx.ID_ANY)
+        data_ddt.Show(False)
+        self._aggiungiDataDDTMPPicker = wx.adv.DatePickerCtrl(self, wx.ID_ANY)
+        self._aggiungiDataDDTMPPicker.Show(False)
 
         #padding
         pad1 = wx.StaticText(self, label='(*) = campi che richiedono obbligatoriamente un valore')
@@ -84,7 +93,7 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
             (data), (self._aggiungiDataMPPicker, wx.ID_ANY, wx.EXPAND),
             (ora), (self._aggiungiOraMPPicker, wx.ID_ANY, wx.EXPAND),
             (ddt), (self._aggiungiDDTMPText, wx.ID_ANY, wx.EXPAND),
-            (data_ddt), (self._aggiungiDataDDTMPPicker, wx.ID_ANY, wx.EXPAND),
+            #(data_ddt), (self._aggiungiDataDDTMPPicker, wx.ID_ANY, wx.EXPAND),
             (pad1), (self._aggiungiMPBtn, wx.ID_ANY, wx.ALIGN_RIGHT)
         ])
 
@@ -136,6 +145,9 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
             cursor.execute(query)
             self._dbm.connessione().commit()
             cursor.commit()
+
+            self.__lotto_g.update_index()
+            self.__window.aggiornaAggiungiMateriePrime()
 
             eDBMMessageDialog("Aggiunta materia prima", "Materia prima aggiunta con successo", False).start()
 

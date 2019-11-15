@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from eDBM.src.model.exceptions.edbm_exception import eDBMException
+from eDBM.src.controller.exceptions.edbm_exception import eDBMException
+
 
 def generaVisualizzaMateriePrimeQuery(codice, descrizione, data):
     query = None
@@ -20,11 +21,8 @@ def generaVisualizzaMateriePrimeQuery(codice, descrizione, data):
                 query += " AND "
 
         if data is not None:
-            data_eur = datetime.datetime.strptime(data, '%m/%d/%Y')
-            data_iso = data_eur.strftime('%Y-%m-%d')
-            print(type(data))
-            query += "Data=#" + str(data) + "#"
-    print(query)
+            data_idiota = datetime.datetime.strptime(data, '%d/%m/%Y')
+            query += "Data=#" + str(data_idiota.date()) + "#"
 
     return query
 
@@ -158,13 +156,11 @@ class eDBMMateriaPrima:
 
     def validaRegistrazione(self, registrazione):
         if registrazione is None :
-            return False
+            registrazione = " "
 
         if not isinstance(registrazione, str):
             return False
 
-        if not registrazione :
-            return False
 
         return True
 
@@ -274,7 +270,7 @@ class eDBMMateriaPrima:
 
     def validaDDT(self, ddt):
         if ddt is None:
-            return False
+           ddt = " "
 
         if not isinstance(ddt, str):
             return False
@@ -417,8 +413,6 @@ class eDBMMateriaPrima:
         query += "'" + self._ddt +"', "
         query += "'" + self._data_ddt + "') "
 
-        print(query)
-
         return query
 
     def generaRimuoviMateriaPrimaQuery(self):
@@ -426,8 +420,6 @@ class eDBMMateriaPrima:
 
         query = "DELETE FROM materie_prime WHERE "
         query += "ID=" + str(self.getID()) +""
-
-        print(query)
 
         return query
 
@@ -445,8 +437,6 @@ class eDBMMateriaPrima:
         query += "DDT='" + str(self.getDDT()) + "',"
         query += "DataDdt='" + str(self.getDataDDT()) + "' "
         query += "WHERE ID=" + str(self.getID()) + ""
-
-        print(query)
 
         return query
 

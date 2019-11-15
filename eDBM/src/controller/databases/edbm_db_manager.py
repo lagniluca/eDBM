@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Classe che permette gestisce la connessione al database
+Class
 """
 
 # libreria di connessione a MS access

@@ -4,38 +4,45 @@
 Classe usata per rappresentare un dialog box nel caso di sottoscorte
 """
 
-#librerie wx
-import wx
+#librerie tkinter
+from tkinter import *
+from tkinter.ttk import Frame, Label
 
-class eDBMSottoscorteDialog(wx.Frame):
-    def __init__(self, parent):
-        super(eDBMSottoscorteDialog, self).__init__(parent, title='eDBM - Sottoscorte')
+class eDBMSottoscorteDialog(Tk):
+    def __init__(self, title, icon):
+        super().__init__()
 
-        self.SetIcon(wx.Icon('sottoscorte.png', wx.BITMAP_TYPE_PNG))
-        self.SetSize((300, 300))
+        self.title(title)
+        self.resizable(False, False)
 
-        self._InitUI()
+        self._InitUI(title)
 
-    def _InitUI(self):
-        panel = wx.Panel(self)
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.listbox = wx.ListBox(panel)
-        hbox.Add(self.listbox, wx.ID_ANY, wx.EXPAND | wx.ALL, 20)
+    def _InitUI(self, title):
 
-        btnPanel = wx.Panel(panel)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        clrBtn = wx.Button(btnPanel, wx.ID_ANY, 'Azzera', size=(90, 30))
+        f = Frame(self)
+        f.pack(fill=BOTH, expand=1)
 
-        self.Bind(wx.EVT_BUTTON, self.OnClear, id=clrBtn.GetId())
-        #self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnRename)
+        xscrollbar = Scrollbar(f, orient=HORIZONTAL)
+        xscrollbar.grid(row=1, column=0, sticky=N + S + E + W)
 
-        vbox.Add((-1, 20))
-        vbox.Add(clrBtn)
+        yscrollbar = Scrollbar(f, orient=VERTICAL)
+        yscrollbar.grid(row=0, column=1, sticky=N + S + E + W)
 
-        btnPanel.SetSizer(vbox)
-        hbox.Add(btnPanel, 0.6, wx.EXPAND | wx.RIGHT, 20)
-        panel.SetSizer(hbox)
+        self.text = Text(f, wrap=NONE,
+                         xscrollcommand=xscrollbar.set,
+                         yscrollcommand=yscrollbar.set)
+        self.text.grid(row=0, column=0)
 
-    def OnClear(self, evt):
-        pass
+        xscrollbar.config(command=self.text.xview)
+        yscrollbar.config(command=self.text.yview)
+
+
+    def append_items(self, items):
+        item = ""
+        for i in items:
+            if i is not None:
+                item = item + i + "\n"
+        self.text.insert(END, item)
+        self.mainloop()
+

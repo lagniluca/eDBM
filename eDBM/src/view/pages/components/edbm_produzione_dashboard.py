@@ -7,6 +7,8 @@ import wx
 import wx.adv
 import wx.lib.scrolledpanel
 
+from eDBM.src.view.pages.components.edbm_suggestion_combo_box import eDBMSuggestionComboBox
+
 
 class eDBMProduzioneDashboard(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent, dbm, gridPanel):
@@ -26,8 +28,14 @@ class eDBMProduzioneDashboard(wx.lib.scrolledpanel.ScrolledPanel):
 
         # codice
         self._articoloProduzioneCheck = wx.CheckBox(self, label='articolo:')
-        self._articoloProduzioneText = wx.TextCtrl(self)
-        self._articoloProduzioneText.Enable(False)
+        cursor = self._dbm.connessione().cursor()
+        cursor.execute("SELECT DISTINCT articolo FROM produzione_cosmec")
+        articoli = list()
+        records = cursor.fetchall()
+        for record in records:
+            articoli.append(str(record[0]))
+        self._articoloProduzioneCombo = eDBMSuggestionComboBox(self, "", choices=articoli, style=wx.CB_SORT)
+        self._articoloProduzioneCombo.Enable(False)
 
         # data
         self._dataProduzioneCheck = wx.CheckBox(self, label='data:')
@@ -56,7 +64,7 @@ class eDBMProduzioneDashboard(wx.lib.scrolledpanel.ScrolledPanel):
         self._filtraMPBtn = wx.Button(self, label='Filtra')
         self._filtraMPBtn.Bind(wx.EVT_BUTTON, self._filtra)
 
-        fgs.AddMany([(self._articoloProduzioneCheck), (self._articoloProduzioneText, wx.ID_ANY, wx.EXPAND | wx.ALL),
+        fgs.AddMany([(self._articoloProduzioneCheck), (self._articoloProduzioneCombo, wx.ID_ANY, wx.EXPAND | wx.ALL),
                      (self._dataProduzioneCheck), (self._dataProduzionePicker, wx.ID_ANY, wx.EXPAND | wx.ALL),
                      (self._oraProduzioneText), (self._oraProduzionePicker, wx.ID_ANY, wx.EXPAND | wx.ALL),
                      (pad1), (pad2, wx.ID_ANY, wx.EXPAND | wx.ALL),
@@ -81,7 +89,7 @@ class eDBMProduzioneDashboard(wx.lib.scrolledpanel.ScrolledPanel):
         if isChecked:
             enabled = True
 
-        self._articoloProduzioneText.Enable(enabled)
+        self._articoloProduzioneCombo.Enable(enabled)
 
     def _filtraDataProduzioneChecked(self, e):
         sender = e.GetEventObject()
@@ -98,7 +106,7 @@ class eDBMProduzioneDashboard(wx.lib.scrolledpanel.ScrolledPanel):
         data = None
 
         if self._articoloProduzioneCheck.IsChecked():
-            articolo = str(self._articoloProduzioneText.GetValue())
+            articolo = str(self._articoloProduzioneCombo.GetValue())
 
         if self._dataProduzioneCheck.IsChecked():
             data_dt = self._dataProduzionePicker.GetValue()

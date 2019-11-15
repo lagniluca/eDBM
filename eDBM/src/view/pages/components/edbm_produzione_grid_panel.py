@@ -108,6 +108,13 @@ class eDBMProduzioneGridPanel(wx.Panel):
         read_only = True
         record = 0
         current_rows = self._grid.GetNumberRows()
+        dati = len(self._table_content_original)
+
+        if dati < current_rows:
+            if dati > 0:
+                self._grid.DeleteRows(dati - 1, (current_rows - 1) - (dati - 1), True)
+            else:
+                self._grid.DeleteRows(0, current_rows, True)
 
         for prod in self._table_content_original:
 
@@ -179,7 +186,8 @@ class eDBMProduzioneGridPanel(wx.Panel):
         self._grid.CreateGrid(0, PRODUZIONE_NUMERO_CAMPI)
 
         self._InitGridHeader()
-        self._InitGridContent()
+        #self._InitGridContent()
+        self._grid.HideCol(0)
 
         # Placement of the grid component inside the panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -250,8 +258,6 @@ class eDBMProduzioneGridPanel(wx.Panel):
     def filtraRisultato(self, articolo, data):
 
        query = generaVisualizzaProduzioneQuery(articolo, data)
-
-       print(query)
 
        if query is not None:
            self._RetriveTableContent(query)

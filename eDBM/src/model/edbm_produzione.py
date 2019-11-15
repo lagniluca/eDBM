@@ -5,7 +5,7 @@ Classe che modella un record di produzione
 """
 import datetime
 
-from eDBM.src.model.exceptions.edbm_exception import eDBMException
+from eDBM.src.controller.exceptions.edbm_exception import eDBMException
 
 
 def generaVisualizzaProduzioneQuery(articolo, data):
@@ -20,7 +20,8 @@ def generaVisualizzaProduzioneQuery(articolo, data):
                 query += " AND "
 
         if data is not None:
-            query += "data=#" + data + "#"
+            data_idiota =  datetime.datetime.strptime(data, '%d/%m/%Y')
+            query += "data=#" + str(data_idiota.date()) + "#"
 
     return query
 

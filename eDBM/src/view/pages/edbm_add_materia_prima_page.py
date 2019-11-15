@@ -13,7 +13,7 @@ from eDBM.src.view.pages.components.edbm_add_materia_prima_dash import eDBMAddMa
 
 
 class eDBMAddMateriaPrimaPage(wx.lib.scrolledpanel.ScrolledPanel):
-    def __init__(self, parent, dbm):
+    def __init__(self, parent, window, dbm):
         super(eDBMAddMateriaPrimaPage, self).__init__(parent)
 
         self._notebook = wx.Notebook(self)
@@ -22,7 +22,7 @@ class eDBMAddMateriaPrimaPage(wx.lib.scrolledpanel.ScrolledPanel):
         self._aggiungiMateriaPrimaTab = wx.Panel(self._notebook)
         box = wx.BoxSizer(wx.VERTICAL)
 
-        self._pan1 = eDBMAddMateriaPrimaDash(self._aggiungiMateriaPrimaTab, dbm)
+        self._pan1 = eDBMAddMateriaPrimaDash(self._aggiungiMateriaPrimaTab, window, dbm)
 
         box.Add(self._pan1, wx.ID_ANY, wx.EXPAND)
         self._aggiungiMateriaPrimaTab.SetSizer(box)

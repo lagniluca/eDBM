@@ -4,15 +4,13 @@
 Class used for creating a grid component
 """
 
-import pyodbc
-
 import traceback
 
 import wx
 import wx.grid
 
+from eDBM.src.controller.exceptions.edbm_exception import eDBMException
 from eDBM.src.model.edbm_materia_prima import eDBMMateriaPrima, generaVisualizzaMateriePrimeQuery
-from eDBM.src.model.exceptions.edbm_exception import eDBMException
 from eDBM.src.view.pages.components.edbm_message_dialog import eDBMMessageDialog
 
 # numero di campi delle materie prime
@@ -29,7 +27,6 @@ MP_INDICE_DATA = 6
 MP_INDICE_ORA = 7
 MP_INDICE_DDT = 8
 MP_INDICE_DATA_DDT = 9
-
 
 
 class eDBMMateriePrimeGridPanel(wx.Panel):
@@ -83,8 +80,11 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
 
         dati = len(self._table_content_original)
 
-        if dati < current_rows :
-            self._grid.DeleteRows(dati - 1, (current_rows - 1) - (dati -1), True)
+        if dati < current_rows:
+            if dati > 0:
+                self._grid.DeleteRows(dati - 1, (current_rows - 1) - (dati - 1), True)
+            else:
+                self._grid.DeleteRows(0, current_rows, True)
 
         for mp in self._table_content_original:
             column = 0
@@ -94,7 +94,7 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
                 row = current_rows
                 current_rows = current_rows + 1
 
-            if self._alter_flag :
+            if self._alter_flag:
                 strList = list()
                 strList.append("NO")
                 strList.append("SI")
@@ -146,12 +146,16 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
         if self._alter_flag:
             self._grid.CreateGrid(0, MP_CAMPI + 1)
             self._grid.Bind(wx.grid.EVT_GRID_CELL_CHANGED, self._CellChanged)
+            self._grid.HideCol(1)
+            self._grid.HideCol(MP_CAMPI)
         else:
             self._grid.CreateGrid(0, MP_CAMPI)
+            self._grid.HideCol(0)
+            self._grid.HideCol(MP_CAMPI - 1)
 
         self._InitGridHeader()
 
-        if self._alter_flag :
+        if self._alter_flag:
             vbox = wx.BoxSizer(wx.VERTICAL)
             self._modificaBtn = wx.Button(self, wx.ID_ANY, u'Modifica')
             self._modificaBtn.SetBackgroundColour(wx.GREEN)
@@ -160,9 +164,8 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
             self._eliminaBtn.SetBackgroundColour(wx.RED)
             self._eliminaBtn.Bind(wx.EVT_BUTTON, self._eseguiEliminazioni)
 
-
-        if self._alter_flag :
-            vbox.Add(self._modificaBtn, flag=wx.LEFT| wx.CENTER, border=10)
+        if self._alter_flag:
+            vbox.Add(self._modificaBtn, flag=wx.LEFT | wx.CENTER, border=10)
             vbox.Add(self._eliminaBtn, flag=wx.LEFT | wx.BOTTOM, border=10)
 
         # Example of column header setting
@@ -180,7 +183,7 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
 
         # Placement of the grid component inside the panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        if self._alter_flag :
+        if self._alter_flag:
             fgs = wx.FlexGridSizer(1, 2, 9, 25)
 
             fgs.AddMany([
@@ -224,7 +227,6 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
             mp.setData(data)
             ora = str(record[MP_INDICE_ORA].strftime("%H:%M:%S"))
             mp.setOra(str(ora))
-            print(record[MP_INDICE_DATA])
             mp.setDDT(record[MP_INDICE_DDT])
             data_ddt = str(record[MP_INDICE_DATA_DDT].strftime("%H:%M:%S"))
             mp.setDataDDT(data_ddt)
@@ -270,7 +272,7 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
         self._grid.ForceRefresh()
 
         # aggiorno la pagina
-        #self._window.aggiornaVisualizzaMateriePrime()
+        # self._window.aggiornaVisualizzaMateriePrime()
 
     def _eseguiEliminazioni(self, event):
         # esecuzione della query di cancellazione
@@ -293,13 +295,12 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
         self._grid.ForceRefresh()
         self._table_content_deleted = list()
 
-
     def _CellChanged(self, event):
         changed_row = event.GetRow()
         changed_column = event.GetCol()
 
         # caso di intenzione di eliminazione riga
-        if changed_column == 0 :
+        if changed_column == 0:
             cancellare = str(self._grid.GetCellValue(changed_row, changed_column))
 
             if cancellare == "SI":
@@ -321,8 +322,8 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
                     if i != 1:
                         self._grid.SetReadOnly(changed_row, i, False)
                     i = i + 1
-        else :
-            try :
+        else:
+            try:
                 position = changed_row
                 value = self._grid.GetCellValue(changed_row, changed_column)
 
@@ -368,5 +369,3 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
                 eDBMMessageDialog("Errore modifica materia prima", "valore inserito non valido", True).start()
 
         self._grid.ForceRefresh()
-
-
