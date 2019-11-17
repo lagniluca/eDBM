@@ -1,2 +1,2 @@
 # eDBM
-Simple data base manager
+Simple database manager programmed in Python and using wx as GUI libraries
