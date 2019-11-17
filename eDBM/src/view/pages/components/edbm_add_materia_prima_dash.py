@@ -31,7 +31,7 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
     def _InitUI(self):
         # Layouts
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        fgs = wx.FlexGridSizer(9, 2, 9, 25)
+        fgs = wx.FlexGridSizer(10, 2, 9, 25)
 
         # codice
         codice = wx.StaticText(self, label='(*)codice:')
@@ -44,13 +44,13 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
         # lotto
         lotto = wx.StaticText(self, label='(*)lotto:')
         self._aggiungiLottoMPText = wx.TextCtrl(self)
-        self.__lotto_g = eDBMLottoGenerator()
-        lotto_str = self.__lotto_g.get_lotto()
-        self._aggiungiLottoMPText.SetValue(lotto_str)
+        #self.__lotto_g = eDBMLottoGenerator()
+        #lotto_str = self.__lotto_g.get_lotto()
+        #self._aggiungiLottoMPText.SetValue(lotto_str)
 
 
         # registrazione
-        registrazione = wx.StaticText(self, label='registrazione:')
+        registrazione = wx.StaticText(self, label='(*)registrazione:')
         self._aggiungiRegistrazioneMPText = wx.TextCtrl(self)
 
         # tipo
@@ -59,12 +59,14 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
         self._aggiungiTipoMPCombo = wx.ComboBox(self, choices=opzioni, style=wx.CB_READONLY)
         self._aggiungiTipoMPCombo.SetValue(opzioni[0])
         # data
-        data = wx.StaticText(self, label='(*)data:')
+        data = wx.StaticText(self, label='(*)data inserimento: ')
         self._aggiungiDataMPPicker = wx.adv.DatePickerCtrl(self, wx.ID_ANY, wx.DefaultDateTime)
+        self._aggiungiDataMPPicker.Enable(False)
 
         # ora
-        ora = wx.StaticText(self, label='(*)ora:')
+        ora = wx.StaticText(self, label='(*)ora inserimento:')
         self._aggiungiOraMPPicker = wx.adv.TimePickerCtrl(self, wx.ID_ANY)
+        self._aggiungiOraMPPicker.Enable(False)
 
         # ddt
         ddt = wx.StaticText(self, label='DDT:')
@@ -72,9 +74,9 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
 
         # data ddt
         data_ddt = wx.StaticText(self, label='(*)data DDT:')
-        data_ddt.Show(False)
+        #data_ddt.Show(False)
         self._aggiungiDataDDTMPPicker = wx.adv.DatePickerCtrl(self, wx.ID_ANY)
-        self._aggiungiDataDDTMPPicker.Show(False)
+        #self._aggiungiDataDDTMPPicker.Show(False)
 
         #padding
         pad1 = wx.StaticText(self, label='(*) = campi che richiedono obbligatoriamente un valore')
@@ -93,7 +95,7 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
             (data), (self._aggiungiDataMPPicker, wx.ID_ANY, wx.EXPAND),
             (ora), (self._aggiungiOraMPPicker, wx.ID_ANY, wx.EXPAND),
             (ddt), (self._aggiungiDDTMPText, wx.ID_ANY, wx.EXPAND),
-            #(data_ddt), (self._aggiungiDataDDTMPPicker, wx.ID_ANY, wx.EXPAND),
+            (data_ddt), (self._aggiungiDataDDTMPPicker, wx.ID_ANY, wx.EXPAND),
             (pad1), (self._aggiungiMPBtn, wx.ID_ANY, wx.ALIGN_RIGHT)
         ])
 
@@ -123,7 +125,7 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
             ora = ora_dt.Format("%H:%M:%S")
             ddt = self._aggiungiDDTMPText.GetValue()
             data_ddt_dt = self._aggiungiDataDDTMPPicker.GetValue()
-            data_ddt = data_ddt_dt.Format("%H:%M:%S")
+            data_ddt = data_ddt_dt.Format("%d/%m/%Y")
 
             # creazione dell'oggetto
             materia_prima = eDBMMateriaPrima()
@@ -146,8 +148,8 @@ class eDBMAddMateriaPrimaDash(wx.lib.scrolledpanel.ScrolledPanel):
             self._dbm.connessione().commit()
             cursor.commit()
 
-            self.__lotto_g.update_index()
-            self.__window.aggiornaAggiungiMateriePrime()
+            #self.__lotto_g.update_index()
+            #self.__window.aggiornaAggiungiMateriePrime()
 
             eDBMMessageDialog("Aggiunta materia prima", "Materia prima aggiunta con successo", False).start()
 

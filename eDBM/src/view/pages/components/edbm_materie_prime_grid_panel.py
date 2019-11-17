@@ -147,11 +147,13 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
             self._grid.CreateGrid(0, MP_CAMPI + 1)
             self._grid.Bind(wx.grid.EVT_GRID_CELL_CHANGED, self._CellChanged)
             self._grid.HideCol(1)
-            self._grid.HideCol(MP_CAMPI)
+            self._grid.HideCol(MP_INDICE_ORA + 1)
+            #self._grid.HideCol(MP_CAMPI)
         else:
             self._grid.CreateGrid(0, MP_CAMPI)
             self._grid.HideCol(0)
-            self._grid.HideCol(MP_CAMPI - 1)
+            self._grid.HideCol(MP_INDICE_ORA)
+            #self._grid.HideCol(MP_CAMPI - 1)
 
         self._InitGridHeader()
 
@@ -228,7 +230,7 @@ class eDBMMateriePrimeGridPanel(wx.Panel):
             ora = str(record[MP_INDICE_ORA].strftime("%H:%M:%S"))
             mp.setOra(str(ora))
             mp.setDDT(record[MP_INDICE_DDT])
-            data_ddt = str(record[MP_INDICE_DATA_DDT].strftime("%H:%M:%S"))
+            data_ddt = str(record[MP_INDICE_DATA_DDT].strftime("%d/%m/%Y"))
             mp.setDataDDT(data_ddt)
 
             # aggiunta alla lista dell'oggetto materia prima

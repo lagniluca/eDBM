@@ -156,11 +156,13 @@ class eDBMMateriaPrima:
 
     def validaRegistrazione(self, registrazione):
         if registrazione is None :
-            registrazione = " "
+            return False
 
         if not isinstance(registrazione, str):
             return False
 
+        if not registrazione:
+            return False
 
         return True
 
@@ -304,7 +306,7 @@ class eDBMMateriaPrima:
             return False
 
         try:
-            datetime.datetime.strptime(dataDDT, "%H:%M:%S")
+            datetime.datetime.strptime(dataDDT, "%d/%m/%Y")
         except ValueError:
             return False
 
@@ -412,6 +414,8 @@ class eDBMMateriaPrima:
         query += "'" + self._ora + "', "
         query += "'" + self._ddt +"', "
         query += "'" + self._data_ddt + "') "
+
+        print(query);
 
         return query
 
